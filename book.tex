@@ -43,8 +43,10 @@
 
 このラムダ記法は、任意の \( x \) に対して \( f \p{ x } = x + 2 \) が成り立つ関数を、 \( \lambda x \ldotp \p{ x + 2 } \) と書くというものである。このような式をラムダ抽象あるいは無名関数と呼ぶ。
 
-ラムダ抽象は変数の名前が変わっても等しくなければならない。たとえば、 \( \lambda x \ldotp \p{ x^3 + x + 1 } \) と \( \lambda y \ldotp \p{ y^3 + y + 1 } \) は等しいものでなければならない。これは、ラムダ抽象を含む式について、何らかの操作を考えるとき、この関係を保たなければならないということを意味する。
+ラムダ抽象は変数の名前が変わっても等しくなければならない。たとえば、 \( \lambda x \ldotp \p{ x^3 + x + 1 } \) と \( \lambda y \ldotp \p{ y^3 + y + 1 } \) は等しいものでなければならない。これは、ラムダ抽象を含む式について、何らかの操作を考えるとき、この関係を保たなければならないということも意味する。これに従ってラムダ抽象を含む式を書き換えることを \( \_ \rightarrow_\alpha \_ \) で書く。ついでに、ラムダ抽象を含む式を適用で書き換えることを \( \_ \rightarrow_\beta \_ \) で書く。
 
-\( \lambda x \ldotp \lambda y \ldotp \p{ x + y } \) を \( y \) に適用することを考えよう。単純に考えれば、 \( \p{ \lambda x \ldotp \lambda y \ldotp \p{ x + y } } \p{ y } = \p{ \lambda y \ldotp \p{ y + y } } \) になるが、これが正しいとすると、 \( \p{ \lambda x \ldotp \lambda y \ldotp \p{ x + y } } \p{ y } = \p{ \lambda x \ldotp \lambda z \ldotp \p{ x + z } } \p{ y } = \p{ \lambda z \ldotp \p{ y + z } } \) と矛盾する。この場合は、後者が正しいものである。このことから、ラムダ抽象を適用する際は、変数の名前を変えなければ正しい結果にならないことがあるということが分かる。
+\( \lambda x \ldotp \lambda y \ldotp \p{ x + y } \) を \( y \) に適用することを考えよう。単純に考えれば、 \( \p{ \lambda x \ldotp \lambda y \ldotp \p{ x + y } } \p{ y } \rightarrow_\beta \p{ \lambda y \ldotp \p{ y + y } } \) になるが、これが正しいとすると、 \( \p{ \lambda x \ldotp \lambda y \ldotp \p{ x + y } } \p{ y } \rightarrow_\alpha \p{ \lambda x \ldotp \lambda z \ldotp \p{ x + z } } \p{ y } \rightarrow_\beta \p{ \lambda z \ldotp \p{ y + z } } \) と矛盾する。この場合、明らかに後者が正しいものである。このことから、ラムダ抽象を適用する際は、変数の名前を変えなければ正しい結果にならないことがあるということが分かる。
+
+\( \_ \rightarrow_\alpha \_ \) をアルファ変換と呼ぶ。 \( \_ \rightarrow_\beta \_ \) をベータ変換あるいはベータ簡約と呼ぶ。これで、ラムダ計算を定義するのに必要な概念が出揃った。
 
 \end{document}
