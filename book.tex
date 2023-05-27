@@ -49,4 +49,46 @@
 
 \( \_ \rightarrow_\alpha \_ \) をアルファ変換と呼ぶ。 \( \_ \rightarrow_\beta \_ \) をベータ変換あるいはベータ簡約と呼ぶ。これで、ラムダ計算を定義するのに必要な概念が出揃った。
 
+\section{ラムダ計算}
+
+ここからは面倒を避けるために \( f \p{ x } \) を \( f \cdot x \) と表記することにする。
+
+ラムダ計算の前項 (pre-term) を、次のように定義する。
+
+\begin{enumerate}
+    \item \( x \) を変数とすると、 \( x \) は前項である。
+    \item \( x \) を変数として、 \( T \) を前項であるとすると、 \( \lambda x \ldotp T \) は前項である。
+    \item \( T \) を仮項でして、 \( S \) を前項であるとすると、 \( T \cdot S \) は前項である。
+\end{enumerate}
+
+「 \( x \) は \( T \) の変数である」を次のように定義する。
+
+\begin{enumerate}
+    \item \( x \) は \( x \) の変数である。
+    \item \( x \) は \( \lambda x \ldotp T \) の変数である。
+    \item \( x \) が \( T \) の変数であれば、 \( x \) は \( \lambda y \ldotp T \) の変数である。
+    \item \( x \) が \( T \) の変数であれば、 \( x \) は \( T \cdot S \) の変数である。
+    \item \( x \) が \( S \) の変数であれば、 \( x \) は \( T \cdot S \) の変数である。
+\end{enumerate}
+
+「 \( x \) は \( T \) の自由変数である」を次のように定義する。
+
+\begin{enumerate}
+    \item \( x \) は \( x \) の自由変数である。
+    \item \( x \) は \( \lambda x \ldotp T \) の自由変数ではない。
+    \item \( x \) が \( T \) の自由変数であれば、 \( x \) は \( \lambda y \ldotp T \) の自由変数である。
+    \item \( x \) が \( T \) の自由変数であれば、 \( x \) は \( T \cdot S \) の自由変数である。
+    \item \( x \) が \( S \) の自由変数であれば、 \( x \) は \( T \cdot S \) の自由変数である。
+\end{enumerate}
+
+「 \( x \) は \( T \) の束縛変数である」を次のように定義する。
+
+\begin{enumerate}
+    \item \( x \) は \( x \) の束縛変数ではない。
+    \item \( x \) は \( \lambda x \ldotp T \) の束縛変数である。
+    \item \( x \) が \( T \) の束縛変数であれば、 \( x \) は \( \lambda y \ldotp T \) の束縛変数である。
+    \item \( x \) が \( T \) の束縛変数であれば、 \( x \) は \( T \cdot S \) の束縛変数である。
+    \item \( x \) が \( S \) の束縛変数であれば、 \( x \) は \( T \cdot S \) の束縛変数である。
+\end{enumerate}
+
 \end{document}
