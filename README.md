@@ -198,3 +198,28 @@ Rust は様々な性能向上の仕組みを持っているが、それでも目
 ラカーセアーを型付きラムダ計算として見なすと、それは関数型と $` T `$ しか型を持たず、 $` ( T \rightarrow T ) `$ が $` T `$ と等しいような理論となる。すなわち、自明な理論に対応している。
 
 自明な理論であるということは、ありとあらゆる命題が等しいということである。すなわち、任意の型 $` A `$ と任意の型 $` B `$ に対して、 $` A \rightarrow B `$ という関数が存在する。さらに、これに多重度も加えるには継続を使えばよく、最終的に $` ( \_ :_m A ) \rightarrow ( ( \_ :_n B ) \rightarrow C ) \rightarrow C `$ となる。
+
+### Labda は Classic モナドを用いて古典論理を記述できるものとする。
+
+Labda は、プログラミング言語の側面を持つ定理証明支援系の例に漏れず、古典論理を特徴づける公理を証明することは出来ない。では、どのようにして古典論理を扱えばよいのだろうか？
+
+1. 公理を簡約できない値として追加する。
+1. 常に公理を仮定として含める。
+
+一番目の方法は、妥当な証明は妥当なプログラムと対応するという設計原理と相容れない。二番目の方法は、かなり良さそうであるが、仮定を与えて議論を実体化できないのが微妙である。もっと良い方法はないのだろうか？
+
+継続を使うことで、排中律およびパースの公理を実装できることは有名な話である。
+
+```coq
+Definition law_of_excluded_middle ( R : Type ) ( A : Type ) : ( Sum A ( A -> R ) -> R ) -> R := fun x : Sum A ( A -> R ) -> R => x ( right_Sum A ( A -> R ) ( fun y : A => x ( left_Sum A ( A -> R ) y ) ) ).
+
+Definition peirce_s_law ( R : Type ) ( A : Type ) ( B : Type ) : ( ( A -> ( B -> R ) -> R ) -> ( A -> R ) -> R ) -> ( A -> R ) -> R := fun x : ( A -> ( B -> R ) -> R ) -> ( A -> R ) -> R => fun y : A -> R => x ( fun z : A => fun w : B -> R => y z ) c.
+```
+
+Martin Escardo によると、 HoTT の選択公理は排中律 (the law of excluded middle, LEM) と二重否定シフト (the double negation shift, DNS) へ分解できるそうだ。
+
+> The axiom of choice in HoTT/UF is equivalent to the conjunction of the principle of excluded middle and the double negation shift. — [Martin Escardo, Mathstodon](https://mathstodon.xyz/@MartinEscardo/109546986011309833)
+
+排中律は、前述のように継続を使って実装できる。ならば、二重否定シフトも継続を使って実装できないだろうか？　それが出来れば、 HoTT の選択公理は高階の宇宙の存在とも合わせれば ZFC のモデルの存在が証明できるぐらい強いため、古典論理を翻訳できたと言ってもよいぐらいになる。
+
+"[Delimited control operators prove Double-negation Shift](https://arxiv.org/abs/1012.0929)" によれば、二重否定シフトは限定継続を使って実装できるそうだ。
