@@ -197,4 +197,4 @@ Rust は様々な性能向上の仕組みを持っているが、それでも目
 
 ラカーセアーを型付きラムダ計算として見なすと、それは関数型と $` T `$ しか型を持たず、 $` ( T \rightarrow T ) `$ が $` T `$ と等しいような理論となる。すなわち、自明な理論に対応している。
 
-自明な理論であるということは、ありとあらゆる命題が等しいということである。すなわち、任意の型 $` A `$ と任意の型 $` B `$ に対して、 $` A \rightarrow B `$ という関数が存在する。さらに、これに多重度も加えるには継続を使えばよく、そうすると $` ( \_ :_m A ) \rightarrow ( ( \_ :_n B ) \rightarrow C ) \rightarrow C `$ となる。後は、この型に Unsafe モナドを付けるだけである。
+自明な理論であるということは、ありとあらゆる命題が等しいということである。すなわち、任意の型 $` A `$ と任意の型 $` B `$ に対して、 $` A \rightarrow B `$ という関数が存在する。さらに、これに多重度も加えるには継続を使えばよく、そうすると $` ( \_ :_m A ) \rightarrow ( \_ :_1 ( \_ :_n B ) \rightarrow \mathrm{Unrestricted} ( C ) ) \rightarrow \mathrm{Unrestricted} ( C ) `$ となる。（この型に `Unrestricted` が付いているのは `C` に `B` を代入して `B` の値をそのまま返そうとするのを防ぐためである。まあ、この場合は無意味かもしれないけど。）後は、この型に Unsafe モナドを付けるだけである。つまり、 $` ( \_ :_m A ) \rightarrow ( \_ :_1 ( \_ :_n B ) \rightarrow \mathrm{Unsafe} ( \mathrm{Unrestricted} ( C ) ) ) \rightarrow \mathrm{Unsafe} ( \mathrm{Unrestricted} ( C ) ) `$ となる。
