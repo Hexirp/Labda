@@ -220,6 +220,128 @@ Martin Escardo によると、 HoTT の選択公理は排中律 (the law of excl
 
 > The axiom of choice in HoTT/UF is equivalent to the conjunction of the principle of excluded middle and the double negation shift. — [Martin Escardo, Mathstodon](https://mathstodon.xyz/@MartinEscardo/109546986011309833)
 
-排中律は、前述のように継続を使って実装できる。ならば、二重否定シフトも継続を使って実装できないだろうか？　それが出来れば、 HoTT の選択公理は高階の宇宙の存在とも合わせれば ZFC のモデルの存在が証明できるぐらい強いため、古典論理を翻訳できたと言ってもよいぐらいになる。
+排中律は、前述のように継続を使って実装できる。ならば、二重否定シフトも継続を使って実装できないだろうか？　それが出来れば、 HoTT の選択公理は高階の宇宙の存在とも合わせれば ZFC のモデルの存在が証明できるぐらい強いため、古典論理を包摂すると言ってもよいぐらいになる。
 
-"[Delimited control operators prove Double-negation Shift](https://arxiv.org/abs/1012.0929)" によれば、二重否定シフトは限定継続を使って実装できるそうだ。
+[Delimited control operators prove Double-negation Shift](https://arxiv.org/abs/1012.0929)" によれば、二重否定シフトは限定継続を使って実装できるそうだ。
+
+`Continue[R]` を限定継続の文脈を持つ型とする。限定継続のプリミティブとして、次の関数がある。
+
+```txt
+reset_ : Continue[A] A -> A
+reset : Continue[A] A -> Continue[B] A
+shift : ((A -> B) -> Continue[B] B) -> Continue[B] A
+```
+
+二重否定シフトは次のような型を持つ関数である。
+
+```txt
+double_negation_shift : ((x : A) -> ((B x -> C) -> C)) -> (((x : A) -> B x) -> C) -> C
+```
+
+これを限定継続のプリミティブを使って実装すると、次のようになる。
+
+```txt
+double_negation_shift = \ (x : (x : A) -> ((B x -> C) -> C)) -> \ (y : ((x : A) -> B x) -> C) -> reset_ (y (\ (z : A) -> shift (\ (w : B z -> C) -> x z w)))
+```
+
+この実装を詳細に見て行こう。 `Continue[C]` のあるなしで型が合わないように見えるが、 `Continue[C]` は型ではないので、なんか良い感じになっている。
+
+```txt
+goal_0 : ((x : A) -> ((B x -> C) -> C)) -> (((x : A) -> B x) -> C) -> C
+goal_0 = \ (x : (x : A) -> ((B x -> C) -> C)) -> \ (y : ((x : A) -> B x) -> C) -> reset_ (y (\ (z : A) -> shift (\ (w : B z -> C) -> x z w)))
+
+goal_1 : (((x : A) -> B x) -> C) -> C
+goal_1 = \ (y : ((x : A) -> B x) -> C) -> reset_ (y (\ (z : A) -> shift (\ (w : B z -> C) -> x z w)))
+
+goal_2 : C
+goal_2 = reset_ (y (\ (z : A) -> shift (\ (w : B z -> C) -> x z w)))
+
+goal_3 : Continue[C] C
+goal_3 = y (\ (z : A) -> shift (\ (w : B z -> C) -> x z w))
+
+goal_4 : Continue[C] ((x : A) -> B x)
+goal_4 = \ (z : A) -> shift (\ (w : B z -> C) -> x z w)
+
+goal_5 : Continue[C] (B x)
+goal_5 = shift (\ (w : B z -> C) -> x z w)
+
+goal_6 : (B z -> C) -> Continue[C] C
+goal_6 = \ (w : B z -> C) -> x z w
+
+goal_7 : Continue[C] C
+goal_7 = x z w
+```
+
+`Continue[A] B` を型で表現することを考えると、 `(B -> A) -> A` となる。この翻訳を使って限定継続のプリミティブを表した場合、次のようになる。
+
+```txt
+reset_ : ((A -> A) -> A) -> A
+reset : ((A -> A) -> A) -> (A -> B) -> B
+shift : ((A -> B) -> (B -> B) -> B) -> (A -> B) -> B
+```
+
+前述の二重否定シフトの実装は `Continue[C]` が型ではないことを利用しているため、そのままでは使えない。なので、根本から一歩一歩再構築していく。
+
+```txt
+goal_7 : (C -> C) -> C
+goal_7 = \ (p : C -> C) -> p (x z w)
+
+goal_6 : (B z -> C) -> (C -> C) -> C
+goal_6 = \ (w : B z -> C) -> \ (p : C -> C) -> p (x z w)
+
+goal_5 : (B x -> C) -> C
+goal_5 = shift (\ (w : B z -> C) -> \ (p : C -> C) -> p (x z w))
+
+goal_4 : (((x : A) -> B x) -> C) -> C
+goal_4 = \ (q : ((x : A) -> B x) -> C) -> q (\ (z : A) -> shift (\ (w : B z -> C) -> \ (p : C -> C) -> p (x z w)))
+
+goal_3 : (C -> C) -> C
+goal_3 = \ (r : C -> C) -> (\ (q : ((x : A) -> B x) -> C) -> q (\ (z : A) -> shift (\ (w : B z -> C) -> \ (p : C -> C) -> p (x z w)))) (\ (v : (x : A) -> B x) -> r (y v))
+
+goal_2 : C
+goal_2 = reset_ (\ (r : C -> C) -> (\ (q : ((x : A) -> B x) -> C) -> q (\ (z : A) -> shift (\ (w : B z -> C) -> \ (p : C -> C) -> p (x z w)))) (\ (v : (x : A) -> B x) -> r (y v)))
+
+goal_1 : (((x : A) -> B x) -> C) -> C
+goal_1 = \ (y : ((x : A) -> B x) -> C) -> reset_ (\ (r : C -> C) -> (\ (q : ((x : A) -> B x) -> C) -> q (\ (z : A) -> shift (\ (w : B z -> C) -> \ (p : C -> C) -> p (x z w)))) (\ (v : (x : A) -> B x) -> r (y v)))
+
+goal_0 : ((x : A) -> ((B x -> C) -> C)) -> (((x : A) -> B x) -> C) -> C
+goal_0 = \ (x : (x : A) -> ((B x -> C) -> C)) -> \ (y : ((x : A) -> B x) -> C) -> reset_ (\ (r : C -> C) -> (\ (q : ((x : A) -> B x) -> C) -> q (\ (z : A) -> shift (\ (w : B z -> C) -> \ (p : C -> C) -> p (x z w)))) (\ (v : (x : A) -> B x) -> r (y v)))
+```
+
+残念ながら、 `goal_4` でどうしようもないギャップが発生してしまっている。
+
+方針を変えて埋め込みを考察してみよう。
+
+```txt
+type_00 : [[ ((x : A) -> ((B x -> C) -> C)) -> (((x : A) -> B x) -> C) -> C ]]
+
+type_01 : ([ ((x : A) -> ((B x -> C) -> C)) -> (((x : A) -> B x) -> C) -> C ] -> T) -> T
+
+type_02 : (([ (x : A) -> ((B x -> C) -> C) ] -> [[ (((x : A) -> B x) -> C) -> C ]]) -> T) -> T
+
+type_03 : ((((x : A) -> [[ ((B x -> C) -> C) ]]) -> [[ (((x : A) -> B x) -> C) -> C ]]) -> T) -> T
+
+type_04 : ((((x : A) -> ([ (B x -> C) -> C ] -> T) -> T) -> [[ (((x : A) -> B x) -> C) -> C ]]) -> T) -> T
+
+type_05 : ((((x : A) -> (([ B x -> C ] -> [[ C ]]) -> T) -> T) -> [[ (((x : A) -> B x) -> C) -> C ]]) -> T) -> T
+
+type_06 : ((((x : A) -> ((([ B x ] -> [[ C ]]) -> [[ C ]]) -> T) -> T) -> [[ (((x : A) -> B x) -> C) -> C ]]) -> T) -> T
+
+type_07 : ((((x : A) -> (((B x -> [[ C ]]) -> [[ C ]]) -> T) -> T) -> [[ (((x : A) -> B x) -> C) -> C ]]) -> T) -> T
+
+type_08 : ((((x : A) -> (((B x -> (C -> T) -> T) -> [[ C ]]) -> T) -> T) -> [[ (((x : A) -> B x) -> C) -> C ]]) -> T) -> T
+
+type_09 : ((((x : A) -> (((B x -> (C -> T) -> T) -> (C -> T) -> T) -> T) -> T) -> [[ (((x : A) -> B x) -> C) -> C ]]) -> T) -> T
+
+type_10 : ((((x : A) -> (((B x -> (C -> T) -> T) -> (C -> T) -> T) -> T) -> T) -> ([ ((x : A) -> B x) -> C ] -> [[ C ]])) -> T) -> T
+
+type_11 : ((((x : A) -> (((B x -> (C -> T) -> T) -> (C -> T) -> T) -> T) -> T) -> (([ (x : A) -> B x ] -> [[ C ]]) -> [[ C ]])) -> T) -> T
+
+type_12 : ((((x : A) -> (((B x -> (C -> T) -> T) -> (C -> T) -> T) -> T) -> T) -> ((((x : A) -> [[ B x ]]) -> [[ C ]]) -> [[ C ]])) -> T) -> T
+
+type_13 : ((((x : A) -> (((B x -> (C -> T) -> T) -> (C -> T) -> T) -> T) -> T) -> ((((x : A) -> (B x -> T) -> T) -> [[ C ]]) -> [[ C ]])) -> T) -> T
+
+type_14 : ((((x : A) -> (((B x -> (C -> T) -> T) -> (C -> T) -> T) -> T) -> T) -> ((((x : A) -> (B x -> T) -> T) -> (C -> T) -> T) -> [[ C ]])) -> T) -> T
+
+type_15 : ((((x : A) -> (((B x -> (C -> T) -> T) -> (C -> T) -> T) -> T) -> T) -> ((((x : A) -> (B x -> T) -> T) -> (C -> T) -> T) -> (C -> T) -> T)) -> T) -> T
+```
