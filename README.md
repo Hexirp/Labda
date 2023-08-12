@@ -224,7 +224,7 @@ Martin Escardo によると、 HoTT の選択公理は排中律 (the law of excl
 
 排中律は、前述のように継続を使って実装できる。ならば、二重否定シフトも継続を使って実装できないだろうか？　それが出来れば、 ZFC 集合論のモデルを作ることも可能になり、現在の数学の大部分を扱う土台が成り立つといえよう。
 
-[Delimited control operators prove Double-negation Shift](https://arxiv.org/abs/1012.0929)" によれば、二重否定シフトは限定継続を使って実装できるらしい。これを参考にして考察してみよう。
+"[Delimited control operators prove Double-negation Shift](https://arxiv.org/abs/1012.0929)" によれば、二重否定シフトは限定継続を使って実装できるらしい。これを参考にして考察してみよう。
 
 `Continue[R]` を限定継続の文脈を持つ型とする。限定継続のプリミティブとして、次の関数がある。
 
@@ -364,4 +364,186 @@ type_20 = ((((x : A) -> (((B x -> (C -> T) -> T) -> (C -> T) -> T) -> T) -> T) -
 type_21 = ((((x : A) -> (((B x -> (C -> T) -> T) -> (C -> T) -> T) -> T) -> T) -> (((((x : A) -> (B x -> T) -> T) -> (C -> T) -> T) -> (C -> T) -> T) -> T) -> T) -> T) -> T
 ```
 
-これを実装してみよう。複雑すぎるので Coq を使う。
+実装も同様に変換することが出来る。
+
+```txt
+goal_00 = [ \ x -> \ y -> reset (y (\ z -> shift (\ w -> x z w))) ]
+
+goal_01 = \ k_0 -> k_0 (\ x -> \ k_1 -> [ \ y -> reset (y (\ z -> shift (\ w -> x z w))) ] (\ t_0 -> k_1 t_0))
+
+goal_02 = \ k_0 -> k_0 (\ x -> \ k_1 -> (\ k_2 -> k_2 (\ y -> \ k_3 -> [ reset (y (\ z -> shift (\ w -> x z w))) ] (\ t_1 -> k_3 t_1))) (\ t_0 -> k_1 t_0))
+
+goal_03 = \ k_0 -> k_0 (\ x -> \ k_1 -> (\t_0 -> k_1 t_0) (\ y -> \ k_3 -> [ reset (y (\ z -> shift (\ w -> x z w))) ] (\ t_1 -> k_3 t_1)))
+
+goal_04 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> [ reset (y (\ z -> shift (\ w -> x z w))) ] (\ t_1 -> k_3 t_1)))
+
+goal_05 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> (\ k_4 -> k_4 ([ y (\ z -> shift (\ w -> x z w)) ] (\ t_2 -> t_2))) (\ t_1 -> k_3 t_1)))
+
+goal_06 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> (\ t_1 -> k_3 t_1) ([ y (\ z -> shift (\ w -> x z w)) ] (\ t_2 -> t_2))))
+
+goal_07 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 ([ y (\ z -> shift (\ w -> x z w)) ] (\ t_2 -> t_2))))
+
+goal_08 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 ((\ k_4 -> [ y ] (\ t_3 -> [ \ z -> shift (\ w -> x z w) ] (\ t_4 -> t_3 t_4 (\ t_5 -> k_4 t_5)))) (\ t_2 -> t_2))))
+
+goal_09 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 ([ y ] (\ t_3 -> [ \ z -> shift (\ w -> x z w) ] (\ t_4 -> t_3 t_4 (\ t_5 -> (\ t_2 -> t_2) t_5))))))
+
+goal_09 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 ([ y ] (\ t_3 -> [ \ z -> shift (\ w -> x z w) ] (\ t_4 -> t_3 t_4 (\ t_5 -> t_5))))))
+
+goal_10 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 ((\ k_5 -> k_5 y) (\ t_3 -> [ \ z -> shift (\ w -> x z w) ] (\ t_4 -> t_3 t_4 (\ t_5 -> t_5))))))
+
+goal_11 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 ((\ t_3 -> [ \ z -> shift (\ w -> x z w) ] (\ t_4 -> t_3 t_4 (\ t_5 -> t_5))) y)))
+
+goal_12 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 ((\ t_3 -> [ \ z -> shift (\ w -> x z w) ] (\ t_4 -> t_3 t_4 (\ t_5 -> t_5))) y)))
+
+goal_13 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 ([ \ z -> shift (\ w -> x z w) ] (\ t_4 -> y t_4 (\ t_5 -> t_5)))))
+
+goal_14 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 ((\ k_6 -> k_6 (\ z -> \ k_7 -> [ shift (\ w -> x z w) ] (\ t_6 -> k_7 t_6))) (\ t_4 -> y t_4 (\ t_5 -> t_5)))))
+
+goal_15 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 ((\ t_4 -> y t_4 (\ t_5 -> t_5)) (\ z -> \ k_7 -> [ shift (\ w -> x z w) ] (\ t_6 -> k_7 t_6)))))
+
+goal_16 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> [ shift (\ w -> x z w) ] (\ t_6 -> k_7 t_6)) (\ t_5 -> t_5))))
+
+goal_17 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> (\ k_8 -> let w = \ t_8 -> \ k_9 -> k_9 (k_8 t_8) in [ x z w ] (\ t_7 -> t_7)) (\ t_6 -> k_7 t_6)) (\ t_5 -> t_5))))
+
+goal_18 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 ((\ t_6 -> k_7 t_6) t_8) in [ x z w ] (\ t_7 -> t_7)) (\ t_5 -> t_5))))
+
+goal_19 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in [ x z w ] (\ t_7 -> t_7)) (\ t_5 -> t_5))))
+
+goal_20 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in [ x z w ] (\ t_7 -> t_7)) (\ t_5 -> t_5))))
+
+goal_21 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in (\ k_10 -> [ x z ] (\ t_9 -> [ w ] (\ t_10 -> t_9 t_10 (\ t_11 -> k_10 t_11)))) (\ t_7 -> t_7)) (\ t_5 -> t_5))))
+
+goal_22 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in [ x z ] (\ t_9 -> [ w ] (\ t_10 -> t_9 t_10 (\ t_11 -> (\ t_7 -> t_7) t_11)))) (\ t_5 -> t_5))))
+
+goal_23 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in [ x z ] (\ t_9 -> [ w ] (\ t_10 -> t_9 t_10 (\ t_11 -> t_11)))) (\ t_5 -> t_5))))
+
+goal_24 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in (\ k_10 -> [ x ] (\ t_12 -> t_12 z k_10)) (\ t_9 -> [ w ] (\ t_10 -> t_9 t_10 (\ t_11 -> t_11)))) (\ t_5 -> t_5))))
+
+goal_25 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in (\ k_10 -> (\ k_11 -> k_11 x) (\ t_12 -> t_12 z k_10)) (\ t_9 -> [ w ] (\ t_10 -> t_9 t_10 (\ t_11 -> t_11)))) (\ t_5 -> t_5))))
+
+goal_26 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in (\ k_10 -> (\ t_12 -> t_12 z k_10) x) (\ t_9 -> [ w ] (\ t_10 -> t_9 t_10 (\ t_11 -> t_11)))) (\ t_5 -> t_5))))
+
+goal_27 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in (\ k_10 -> x z k_10) (\ t_9 -> [ w ] (\ t_10 -> t_9 t_10 (\ t_11 -> t_11)))) (\ t_5 -> t_5))))
+
+goal_28 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in x z (\ t_9 -> [ w ] (\ t_10 -> t_9 t_10 (\ t_11 -> t_11)))) (\ t_5 -> t_5))))
+
+goal_29 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in x z (\ t_9 -> (\k_12 -> k_12 w) (\ t_10 -> t_9 t_10 (\ t_11 -> t_11)))) (\ t_5 -> t_5))))
+
+goal_30 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in x z (\ t_9 -> (\ t_10 -> t_9 t_10 (\ t_11 -> t_11)) w)) (\ t_5 -> t_5))))
+
+goal_31 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> let w = \ t_8 -> \ k_9 -> k_9 (k_7 t_8) in x z (\ t_9 -> t_9 w (\ t_11 -> t_11))) (\ t_5 -> t_5))))
+
+goal_32 = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5))))
+```
+
+纏めると、次のようになる。
+
+```txt
+double_negation_shift : ((((x : A) -> (((B x -> (C -> T) -> T) -> (C -> T) -> T) -> T) -> T) -> (((((x : A) -> (B x -> T) -> T) -> (C -> T) -> T) -> (C -> T) -> T) -> T) -> T) -> T) -> T
+double_negation_shift = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5))))
+```
+
+Coq で型が合っているか検証する。
+
+```txt
+Definition double_negation_shift (A : Type) (B : A -> Type) (C : Type) (D : Type) : (((forall x : A, (((B x -> (C -> D) -> D) -> (C -> D) -> D) -> D) -> D) -> ((((forall x : A, (B x -> D) -> D) -> (C -> D) -> D) -> (C -> D) -> D) -> D) -> D) -> D) -> D.
+Proof.
+intro k_0.
+apply k_0.
+intro x.
+intro k_1.
+apply k_1.
+intro y.
+intro k_3.
+apply k_3.
+Fail apply y.
+Abort.
+```
+
+型が合わない。これは `C` と `D` が等しくないためだったので、 `C` と `D` が等しいと仮定する。
+
+```txt
+Definition double_negation_shift (A : Type) (B : A -> Type) (C : Type) : (((forall x : A, (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> ((((forall x : A, (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> C) -> C.
+Proof.
+intro k_0.
+apply k_0.
+intro x.
+intro k_1.
+apply k_1.
+intro y.
+intro k_3.
+apply k_3.
+apply y.
+-
+intro z.
+intro k_7.
+apply (x z).
+intro t_9.
+applu t_9.
++
+intro t_8.
+intro k_9.
+apply k_9.
+apply k_7.
+exact t_8.
++
+intro t_11.
+exact t_11.
+-
+intro t_5.
+exact t_5.
+Defined.
+```
+
+これでは定義が複雑すぎるため、もう少し定義を省略できないか試みる。
+
+```txt
+double_negation_shift : ((((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> C) -> C
+double_negation_shift = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5))))
+
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C
+double_negation_shift = \ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5)))
+
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
+double_negation_shift = \ x -> \ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5))
+
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> C
+double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5)
+
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
+double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11)))
+
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
+double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8))))
+
+double_negation_shift : ((x : A) -> (((B x -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
+double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> k_7 t_8)))
+
+double_negation_shift : ((x : A) -> (((B x -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
+double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> k_7 t_8)))
+
+double_negation_shift : ((x : A) -> (B x -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
+double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z (\ t_8 -> k_7 t_8))
+
+double_negation_shift : ((x : A) -> (B x -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
+double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z k_7)
+
+double_negation_shift : ((x : A) -> (B x -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
+double_negation_shift = \ x -> \ y -> y (\ z -> x z)
+
+double_negation_shift : ((x : A) -> B x) -> (((x : A) -> B x) -> C) -> C
+double_negation_shift = \ x -> \ y -> y x
+
+double_negation_shift : ((x : A) -> B x) -> (x : A) -> B x
+double_negation_shift = \ x -> x
+```
+
+結局、恒等関数となった。
+
+"[Delimited control operators prove Double-negation Shift](https://arxiv.org/abs/1012.0929)" は、要するに、全ての関数に継続の文脈が乗っていることを前提にしているわけだ。では、 Labda の全ての関数に継続の文脈が乗っていることにすればよいかというと、それは難しい。一つ目に、それでは構成的な議論と非構成的な議論の分離が出来なくなる。二つ目に、フルの依存型を含む理論に継続を乗せることは大変難しい。三つ目に、 HoTT の公理と矛盾してしまう。
+
+Labda ではプリミティブとし、それをラカーセアーへ翻訳する際に実体を持たせる形はどうだろうか？　これも依存型と HoTT の公理との融合が問題となる。だが、 Labda そのものに手を入れるよりは希望がありそうである。また、実行順序を規定しているため継続を使っても値が不定にならないことも追い風になる。
+
+ここまでは `Continue T A = ((A -> T) -> T)` という文脈のもとで古典論理をエミュレーションしようとしていたが、これをプリミティブとするとなると、その名前を普通の継続モナドと被らないようにしなければならない。そこで、 Classic モナドとすることにする。
+
+一つの試案として、 `Classic A = ((A -> Any) -> Any)` と定義することを考えている。そして、排中律と二重否定シフトを持ち、 `Unwrap : Classic Type -> Type` と `(x : Classic A) -> (y : (x : A) -> Classic (B x)) -> Unwrap (bind x B)` を持つとする。だが、これはたぶんうまくいかない。
