@@ -538,9 +538,50 @@ double_negation_shift : ((x : A) -> B x) -> (x : A) -> B x
 double_negation_shift = \ x -> x
 ```
 
-結局、恒等関数となった。
+恒等関数となった。そういえば、継続モナドは簡略化していくと普通の関数になっちゃうんだった。どこかで簡略化を止めないといけない。
 
-"[Delimited control operators prove Double-negation Shift](https://arxiv.org/abs/1012.0929)" は、要するに、全ての関数に継続の文脈が乗っていることを前提にしているわけだ。では、 Labda の全ての関数に継続の文脈が乗っていることにすればよいかというと、それは難しい。一つ目に、それでは構成的な議論と非構成的な議論の分離が出来なくなる。二つ目に、フルの依存型を含む理論に継続を乗せることは大変難しい。三つ目に、 HoTT の公理と矛盾してしまう。
+```txt
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
+double_negation_shift = \ x -> \ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5))
+```
+
+`reset` 関数と `shift` 関数の形が消えない所で止めることにする。そうなると、やっぱり、この辺りだろうか？
+
+```
+reset : ((A -> A) -> A) -> (A -> B) -> B
+reset = \ (x : (A -> A) -> A) -> \ (y : A -> B) -> y (x (\ (z : A) -> z))
+```
+
+`reset` 関数は、この形をしている。
+
+```txt
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
+double_negation_shift = \ x -> \ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5))
+
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
+double_negation_shift = \ x -> \ y -> reset (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))))
+```
+
+`reset` 関数を使う形に書き換える。
+
+```txt
+shift : ((A -> (B -> B) -> B) -> (B -> B) -> B) -> (A -> B) -> B
+shift = \ (x : (A -> (B -> B) -> B) -> (B -> B) -> B) -> \ (y : A -> B) -> x (\ (z : A) -> \ (w : B -> B) -> w (y z)) (\ (v : B) -> v)
+```
+
+`shift` 関数は、この形をしている。
+
+```txt
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
+double_negation_shift = \ x -> \ y -> reset (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))))
+
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
+double_negation_shift = \ x -> \ y -> reset (y (\ z -> shift (\ w -> \ v -> x z (\ u -> u w v))))
+```
+
+`shift` 関数を使う形に書き換える。
+
+"[Delimited control operators prove Double-negation Shift](https://arxiv.org/abs/1012.0929)" は、要するに、全ての関数に継続の文脈が乗っていることを前提にしているわけだ。では、 Labda の全ての関数に継続の文脈が乗っていることにすればよいかというと、それは難しい。一つ目に、それでは構成的な議論と非構成的な議論の分離が出来なくなる。二つ目に、関数そのものの内容が型を変え得るようなフルの依存型を含む理論に継続を乗せることは大変難しい。三つ目に、 HoTT の公理と矛盾してしまう。
 
 Labda ではプリミティブとし、それをラカーセアーへ翻訳する際に実体を持たせる形はどうだろうか？　これも依存型と HoTT の公理との融合が問題となる。だが、 Labda そのものに手を入れるよりは希望がありそうである。また、実行順序を規定しているため継続を使っても値が不定にならないことも追い風になる。
 
