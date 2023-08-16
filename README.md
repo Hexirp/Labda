@@ -614,6 +614,10 @@ Labda ではプリミティブとし、それをラカーセアーへ翻訳す�
 
 一つの試案として、 `Classic A = ((A -> Any) -> Any)` と定義することを考えている。そして、排中律と二重否定シフトを持ち、 `Unwrap : Classic Type -> Type` と `(x : Classic A) -> (y : (x : A) -> Classic (B x)) -> Unwrap (bind x B)` を持つとする。だが、これはたぶんうまくいかない。
 
+そもそも、モナドと依存型を組み合わせるのは難しい。 `bind_depend : (x : M A) -> ((y : A) -> M (B y)) -> M (B x)` という型は考えられなくもないけど、型が合わない。 `bind_lifted : (x : M A) -> (A -> Type) -> Type` を考えないといけない。そして、 `bind_depend : (x : M A) -> ((y : A) -> M (B y)) -> bind_lifted x B` という風にしなければならない。
+
+Maybe モナドなら、 `match x then { case Nothing => Void; case Just x => Maybe x; }` で処理可能である。 List モナドなら `match x then { case Nil => Void; case Cons xv xs => Sum (List xv) (bind_lifted xs B); }` で処理可能である。しかし、継続モナドでのやり方が分からない。 `(A -> Any) -> Any` の `Any` の部分を unsafe に `Type` として wrap/unwrap するとか？
+
 ### Labda は等式型を持つものとする。
 
 等式型 (identity type) は、定理証明支援系としての能力を得るために必要である。
