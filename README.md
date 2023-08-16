@@ -581,6 +581,31 @@ double_negation_shift = \ x -> \ y -> reset (y (\ z -> shift (\ w -> \ v -> x z 
 
 `shift` 関数を使う形に書き換える。
 
+もっと単純な形にしたい。
+
+```txt
+bind : ((A -> C) -> C) -> (A -> (B -> C) -> C) -> (B -> C) -> C
+bind = \ (x : (A -> C) -> C) -> \ (y : A -> (B -> C) -> C) -> \ (z : B -> C) -> x (\ (w : A) -> y w z)
+```
+
+`bind` 関数は、この形である。
+
+```txt
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
+double_negation_shift = \ x -> \ y -> reset (y (\ z -> shift (\ w -> \ v -> x z (\ u -> u w v))))
+
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
+double_negation_shift = \ x -> \ y -> reset (y (\ z -> shift (\ w -> \ v -> x z (\ u -> (\ t -> t w) u v))))
+
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
+double_negation_shift = \ x -> \ y -> reset (y (\ z -> shift (\ w -> \ v -> x z (\ u -> (\ t -> t w) u v))))
+
+double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
+double_negation_shift = \ x -> \ y -> reset (y (\ z -> shift (\ w -> bind (x z) (\ t -> t w))))
+```
+
+おそらく、これ以上は省略できない。
+
 "[Delimited control operators prove Double-negation Shift](https://arxiv.org/abs/1012.0929)" は、要するに、全ての関数に継続の文脈が乗っていることを前提にしているわけだ。では、 Labda の全ての関数に継続の文脈が乗っていることにすればよいかというと、それは難しい。一つ目に、それでは構成的な議論と非構成的な議論の分離が出来なくなる。二つ目に、関数そのものの内容が型を変え得るようなフルの依存型を含む理論に継続を乗せることは大変難しい。三つ目に、 HoTT の公理と矛盾してしまう。
 
 Labda ではプリミティブとし、それをラカーセアーへ翻訳する際に実体を持たせる形はどうだろうか？　これも依存型と HoTT の公理との融合が問題となる。だが、 Labda そのものに手を入れるよりは希望がありそうである。また、実行順序を規定しているため継続を使っても値が不定にならないことも追い風になる。
