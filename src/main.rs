@@ -46,6 +46,31 @@ impl TermLabdaPure {
             }
         }
     }
+
+    fn is_used_bound(&self, name_target: &String) -> bool {
+        match self {
+            TermLabdaPure::Var { name } => false,
+            TermLabdaPure::App { term_left, term_right, .. } => {
+                false
+                    || term_left.is_used_bound(name_target)
+                    || term_right.is_used_bound(name_target)
+            }
+            TermLabdaPure::Lam { name, term } => {
+                false
+                    || name == name_target
+                    || term.is_used_bound(name_target)
+            }
+            TermLabdaPure::Dup { name_copy_1, name_copy_2, term, .. } => {
+                false
+                    || name_copy_1 == name_target
+                    || name_copy_2 == name_target
+                    || term.is_used_bound(name_target)
+            }
+            TermLabdaPure::Des { name_dropped, term } => {
+                term.is_used_bound(name_target)
+            }
+        }
+    }
 }
 
 fn main() {
