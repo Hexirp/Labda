@@ -20,14 +20,14 @@ impl TermLabdaPure {
         match self {
             TermLabdaPure::Var { name } => name == name_target,
             TermLabdaPure::App { term_left, term_right, .. } => {
-                false
-                    || term_left.is_used(name_target)
-                    || term_right.is_used(name_target)
+                let x = term_left.is_used(name_target);
+                let y = term_right.is_used(name_target);
+                x || y
             }
             TermLabdaPure::Lam { name, term } => {
-                false
-                    || name == name_target
-                    || term.is_used(name_target)
+                let x = name == name_target;
+                let y = term.is_used(name_target);
+                x || y
             }
             TermLabdaPure::Dup {
                 name_copied,
@@ -35,38 +35,40 @@ impl TermLabdaPure {
                 name_copy_2,
                 term,
             } => {
-                false
-                    || name_copied == name_target
-                    || name_copy_1 == name_target
-                    || name_copy_2 == name_target
-                    || term.is_used(name_target)
+                let x = name_copied == name_target;
+                let y = name_copy_1 == name_target;
+                let z = name_copy_2 == name_target;
+                let w = term.is_used(name_target);
+                x || y || z || w
             }
             TermLabdaPure::Des { name_dropped, term } => {
-                name_dropped == name_target || term.is_used(name_target)
+                let x = name_dropped == name_target;
+                let y = term.is_used(name_target);
+                x || y
             }
         }
     }
 
     fn is_used_bound(&self, name_target: &String) -> bool {
         match self {
-            TermLabdaPure::Var { name } => false,
+            TermLabdaPure::Var { .. } => false,
             TermLabdaPure::App { term_left, term_right, .. } => {
-                false
-                    || term_left.is_used_bound(name_target)
-                    || term_right.is_used_bound(name_target)
+                let x = term_left.is_used_bound(name_target);
+                let y = term_right.is_used_bound(name_target);
+                x || y
             }
             TermLabdaPure::Lam { name, term } => {
-                false
-                    || name == name_target
-                    || term.is_used_bound(name_target)
+                let x = name == name_target;
+                let y = term.is_used_bound(name_target);
+                x || y
             }
             TermLabdaPure::Dup { name_copy_1, name_copy_2, term, .. } => {
-                false
-                    || name_copy_1 == name_target
-                    || name_copy_2 == name_target
-                    || term.is_used_bound(name_target)
+                let x = name_copy_1 == name_target;
+                let y = name_copy_2 == name_target;
+                let z = term.is_used_bound(name_target);
+                x || y || z
             }
-            TermLabdaPure::Des { name_dropped, term } => {
+            TermLabdaPure::Des { term, .. } => {
                 term.is_used_bound(name_target)
             }
         }
