@@ -26,8 +26,11 @@ impl TermLabdaPure {
             }
             TermLabdaPure::Lam { name, term } => {
                 let x = name == name_target;
-                let y = term.is_used(name_target);
-                x || y
+                if x {
+                    true
+                } else {
+                    term.is_used(name_target)
+                }
             }
             TermLabdaPure::Dup {
                 name_copied,
@@ -38,8 +41,12 @@ impl TermLabdaPure {
                 let x = name_copied == name_target;
                 let y = name_copy_1 == name_target;
                 let z = name_copy_2 == name_target;
-                let w = term.is_used(name_target);
-                x || y || z || w
+                let w = if y || z {
+                    true
+                } else {
+                    term.is_used(name_target)
+                };
+                x || w
             }
             TermLabdaPure::Des { name_dropped, term } => {
                 let x = name_dropped == name_target;
@@ -59,14 +66,20 @@ impl TermLabdaPure {
             }
             TermLabdaPure::Lam { name, term } => {
                 let x = name == name_target;
-                let y = term.is_used_bound(name_target);
-                x || y
+                if x {
+                    true
+                } else {
+                    term.is_used_bound(name_target)
+                }
             }
             TermLabdaPure::Dup { name_copy_1, name_copy_2, term, .. } => {
                 let x = name_copy_1 == name_target;
                 let y = name_copy_2 == name_target;
-                let z = term.is_used_bound(name_target);
-                x || y || z
+                if x || y {
+                    true
+                } else {
+                    term.is_used_bound(name_target)
+                }
             }
             TermLabdaPure::Des { term, .. } => {
                 term.is_used_bound(name_target)
