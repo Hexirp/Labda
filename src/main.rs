@@ -125,6 +125,77 @@ impl TermLabdaPure {
             }
         }
     }
+
+    fn is_used_conf(
+        &self,
+        flag_bound: bool,
+        flag_free: bool,
+        name_target: &String,
+    ) -> bool {
+        match self {
+            TermLabdaPure::Var { name } => {
+                if flag_free {
+                    name == name_target
+                } else {
+                    false
+                }
+            }
+            TermLabdaPure::App { term_left, term_right, .. } => {
+                let x_left = term_left.is_used_conf(
+                    flag_bound,
+                    flag_free,
+                    name_target,
+                );
+                let x_right = term_right.is_used_conf(
+                    flag_bound,
+                    flag_free,
+                    name_target,
+                );
+                x_left || x_right
+            }
+            TermLabdaPure::Lam { name, term } => {
+                let x = name == name_target;
+                if x {
+                    flag_bound
+                } else {
+                    term.is_used_conf(flag_bound, flag_free, name_target)
+                }
+            }
+            TermLabdaPure::Dup {
+                name_copied,
+                name_copy_1,
+                name_copy_2,
+                term,
+            } => {
+                let x_copied = if flag_free {
+                    name_copied == name_target
+                } else {
+                    false
+                };
+                let x_copy_1 = name_copy_1 == name_target;
+                let x_copy_2 = name_copy_2 == name_target;
+                let x_lambda = if x_copy_1 || x_copy_2 {
+                    flag_bound
+                } else {
+                    term.is_used_conf(flag_bound, flag_free, name_target)
+                };
+                x_copied || x_lambda
+            }
+            TermLabdaPure::Des { name_dropped, term } => {
+                let x_dropped = if flag_free {
+                    name_dropped == name_target
+                } else {
+                    false
+                };
+                let x_term = term.is_used_conf(
+                    flag_bound,
+                    flag_free,
+                    name_target,
+                );
+                x_dropped || x_term
+            }
+        }
+    }
 }
 
 fn main() {
