@@ -227,6 +227,34 @@ impl TermLabdaPure {
         self.update_set_var(&mut set);
         set
     }
+
+    fn update_set_var_bound(&self, set: &mut HashSet<String>) {
+        match self {
+            TermLabdaPure::Var { .. } => {}
+            TermLabdaPure::App { term_left, term_right, .. } => {
+                term_right.update_set_var_bound(set);
+                term_left.update_set_var_bound(set);
+            }
+            TermLabdaPure::Lam { name, term } => {
+                term.update_set_var_bound(set);
+                set.insert(name.clone());
+            }
+            TermLabdaPure::Dup { name_copy_1, name_copy_2, term, .. } => {
+                term.update_set_var_bound(set);
+                set.insert(name_copy_2.clone());
+                set.insert(name_copy_1.clone());
+            }
+            TermLabdaPure::Des { term, .. } => {
+                term.update_set_var_bound(set);
+            }
+        }
+    }
+
+    fn set_var_bound(&self) -> HashSet<String> {
+        let mut set = HashSet::new();
+        self.update_set_var_bound(&mut set);
+        set
+    }
 }
 
 fn main() {
