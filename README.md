@@ -618,6 +618,13 @@ Labda ではプリミティブとし、それをラカーセアーへ翻訳す�
 
 Maybe モナドなら、 `match x then { case Nothing => Void; case Just x => Maybe x; }` で処理可能である。 List モナドなら `match x then { case Nil => Void; case Cons xv xs => Sum (List xv) (bind_lifted xs B); }` で処理可能である。しかし、継続モナドでのやり方が分からない。 `(A -> Any) -> Any` の `Any` の部分を unsafe に `Type` として wrap/unwrap するとか？
 
+まとめると、 `Classic` はモナドであり、次の操作を持つ。
+
+1. `peirce_s_law : (A : Type) -> (((X : Type) -> A -> Classic X) -> Classic A) -> Classic A`
+1. `law_of_exclude_middle : (A : Type) -> Classic (Sum A (A -> Void))`
+1. `double_negation_shift : (A : Type) -> (B : Type) -> ((x : A) -> Classic (B x)) -> Classic ((x : A) -> B x)`
+1. `run : (A : Type) -> Classic A -> Unsafe A`
+
 ### Labda は等式型を持つものとする。
 
 等式型 (identity type) は、定理証明支援系としての能力を得るために必要である。
