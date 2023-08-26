@@ -191,18 +191,18 @@ impl TermLabdaPure {
         }
     }
 
-    fn set_var(&self) -> HashSet<String> {
+    fn update_set_var(&self, set: &mut HashSet<String>) {
         match self {
-            TermLabdaPure::Var { name } => HashSet::new().insert(name),
+            TermLabdaPure::Var { name } => {
+                set.insert(name.clone());
+            },
             TermLabdaPure::App { term_left, term_right, .. } => {
-                let x_left = term_left.set_var();
-                let x_right = term_right.set_var();
-                x_left.extend(&x_right)
+                term_right.update_set_var(set);
+                term_left.update_set_var(set);
             }
             TermLabdaPure::Lam { name, term } => {
-                let x_var = HashSet::new().insert(name);
-                let x_term = term.set_var();
-                x_term.extend(&x_var)
+                term.update_set_var(set);
+                set.insert(name.clone());
             }
             TermLabdaPure::Dup {
                 name_copied,
@@ -210,18 +210,22 @@ impl TermLabdaPure {
                 name_copy_2,
                 term,
             } => {
-                let x_copied = HashSet::new().insert(name_copied);
-                let x_copy_1 = HashSet::new().insert(name_copy_1);
-                let x_copy_2 = HashSet::new().insert(name_copy_2);
-                let x_term = term.set_var();
-                x_term.extend(&x_copied).extend(&x_copy_1).extend(&x_copy_2)
+                term.update_set_var(set);
+                set.insert(name_copy_2.clone());
+                set.insert(name_copy_1.clone());
+                set.insert(name_copied.clone());
             }
             TermLabdaPure::Des { name_dropped, term } => {
-                let x_dropped = HashSet::new().insert(name_dropped);
-                let x_term = term.set_var();
-                x_term.extend(&x_dropped)
+                term.update_set_var(set);
+                set.insert(name_dropped.clone());
             }
         }
+    }
+
+    fn set_var(&self) -> HashSet<String> {
+        let mut set = HashSet::new();
+        self.update_set_var(&mut set);
+        set
     }
 }
 
