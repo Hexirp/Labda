@@ -20,17 +20,14 @@ impl TermLabdaPure {
         match self {
             TermLabdaPure::Var { name } => name == name_target,
             TermLabdaPure::App { term_left, term_right, .. } => {
-                let x = term_left.is_used(name_target);
-                let y = term_right.is_used(name_target);
-                x || y
+                let x_left = term_left.is_used(name_target);
+                let x_right = term_right.is_used(name_target);
+                x_left || x_right
             }
             TermLabdaPure::Lam { name, term } => {
-                let x = name == name_target;
-                if x {
-                    true
-                } else {
-                    term.is_used(name_target)
-                }
+                let x_var = name == name_target;
+                let x_term = term.is_used(name_target);
+                x_var || x_term
             }
             TermLabdaPure::Dup {
                 name_copied,
@@ -38,20 +35,16 @@ impl TermLabdaPure {
                 name_copy_2,
                 term,
             } => {
-                let x = name_copied == name_target;
-                let y = name_copy_1 == name_target;
-                let z = name_copy_2 == name_target;
-                let w = if y || z {
-                    true
-                } else {
-                    term.is_used(name_target)
-                };
-                x || w
+                let x_copied = name_copied == name_target;
+                let x_copy_1 = name_copy_1 == name_target;
+                let x_copy_2 = name_copy_2 == name_target;
+                let x_term = term.is_used(name_target);
+                x_copied || x_copy_1 || x_copy_2 || x_term
             }
             TermLabdaPure::Des { name_dropped, term } => {
-                let x = name_dropped == name_target;
-                let y = term.is_used(name_target);
-                x || y
+                let x_dropped = name_dropped == name_target;
+                let x_term = term.is_used(name_target);
+                x_dropped || x_term
             }
         }
     }
@@ -65,21 +58,15 @@ impl TermLabdaPure {
                 x || y
             }
             TermLabdaPure::Lam { name, term } => {
-                let x = name == name_target;
-                if x {
-                    true
-                } else {
-                    term.is_used_bound(name_target)
-                }
+                let x_var = name == name_target;
+                let x_term = term.is_used_bound(name_target);
+                x_var || x_term
             }
             TermLabdaPure::Dup { name_copy_1, name_copy_2, term, .. } => {
-                let x = name_copy_1 == name_target;
-                let y = name_copy_2 == name_target;
-                if x || y {
-                    true
-                } else {
-                    term.is_used_bound(name_target)
-                }
+                let x_copy_1 = name_copy_1 == name_target;
+                let x_copy_2 = name_copy_2 == name_target;
+                let x_term = term.is_used_bound(name_target);
+                x_copy_1 || x_copy_2 || x_term
             }
             TermLabdaPure::Des { term, .. } => {
                 term.is_used_bound(name_target)
@@ -91,16 +78,14 @@ impl TermLabdaPure {
         match self {
             TermLabdaPure::Var { name } => name == name_target,
             TermLabdaPure::App { term_left, term_right, .. } => {
-                let x = term_left.is_used_free(name_target);
-                let y = term_right.is_used_free(name_target);
-                x || y
+                let x_left = term_left.is_used_free(name_target);
+                let x_right = term_right.is_used_free(name_target);
+                x_left || x_right
             }
             TermLabdaPure::Lam { name, term } => {
-                if name == name_target {
-                    false
-                } else {
-                    term.is_used_free(name_target)
-                }
+                let x_var = name == name_target;
+                let x_term = term.is_used_free(name_target);
+                !x_var && x_term
             }
             TermLabdaPure::Dup {
                 name_copied,
@@ -108,20 +93,17 @@ impl TermLabdaPure {
                 name_copy_2,
                 term,
             } => {
-                let x = name_copied == name_target;
-                let y = name_copy_1 == name_target;
-                let z = name_copy_2 == name_target;
-                let w = if y || z {
-                    false
-                } else {
-                    term.is_used_free(name_target)
-                };
-                x || w
+                let x_copied = name_copied == name_target;
+                let x_copy_1 = name_copy_1 == name_target;
+                let x_copy_2 = name_copy_2 == name_target;
+                let x_term = term.is_used_free(name_target);
+                let x_lambda = !x_copy_1 && !x_copy_2 && x_term;
+                x_copied || x_lambda
             }
             TermLabdaPure::Des { name_dropped, term } => {
-                let x = name_dropped == name_target;
-                let y = term.is_used_free(name_target);
-                x || y
+                let x_dropped = name_dropped == name_target;
+                let x_term = term.is_used_free(name_target);
+                x_dropped || x_term
             }
         }
     }
@@ -154,11 +136,16 @@ impl TermLabdaPure {
                 x_left || x_right
             }
             TermLabdaPure::Lam { name, term } => {
-                let x = name == name_target;
-                if x {
+                let x_var = name == name_target;
+                let x_term = term.is_used_conf(
+                    flag_bound,
+                    flag_free,
+                    name_target,
+                );
+                if x_var {
                     flag_bound
                 } else {
-                    term.is_used_conf(flag_bound, flag_free, name_target)
+                    x_term
                 }
             }
             TermLabdaPure::Dup {
@@ -174,10 +161,15 @@ impl TermLabdaPure {
                 };
                 let x_copy_1 = name_copy_1 == name_target;
                 let x_copy_2 = name_copy_2 == name_target;
+                let x_term = term.is_used_conf(
+                    flag_bound,
+                    flag_free,
+                    name_target,
+                );
                 let x_lambda = if x_copy_1 || x_copy_2 {
                     flag_bound
                 } else {
-                    term.is_used_conf(flag_bound, flag_free, name_target)
+                    x_term
                 };
                 x_copied || x_lambda
             }
