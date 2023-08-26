@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 enum TermLabdaPure {
     Var { name: String },
     App {
@@ -185,6 +187,39 @@ impl TermLabdaPure {
                     name_target,
                 );
                 x_dropped || x_term
+            }
+        }
+    }
+
+    fn set_var(&self) -> HashSet<String> {
+        match self {
+            TermLabdaPure::Var { name } => HashSet::new().insert(name),
+            TermLabdaPure::App { term_left, term_right, .. } => {
+                let x_left = term_left.set_var();
+                let x_right = term_right.set_var();
+                x_left.extend(&x_right)
+            }
+            TermLabdaPure::Lam { name, term } => {
+                let x_var = HashSet::new().insert(name);
+                let x_term = term.set_var();
+                x_term.extend(&x_var)
+            }
+            TermLabdaPure::Dup {
+                name_copied,
+                name_copy_1,
+                name_copy_2,
+                term,
+            } => {
+                let x_copied = HashSet::new().insert(name_copied);
+                let x_copy_1 = HashSet::new().insert(name_copy_1);
+                let x_copy_2 = HashSet::new().insert(name_copy_2);
+                let x_term = term.set_var();
+                x_term.extend(&x_copied).extend(&x_copy_1).extend(&x_copy_2)
+            }
+            TermLabdaPure::Des { name_dropped, term } => {
+                let x_dropped = HashSet::new().insert(name_dropped);
+                let x_term = term.set_var();
+                x_term.extend(&x_dropped)
             }
         }
     }
