@@ -195,7 +195,7 @@ impl TermLabdaPure {
         match self {
             TermLabdaPure::Var { name } => {
                 set.insert(name.clone());
-            },
+            }
             TermLabdaPure::App { term_left, term_right, .. } => {
                 term_right.update_set_var(set);
                 term_left.update_set_var(set);
