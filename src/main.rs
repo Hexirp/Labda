@@ -255,6 +255,43 @@ impl TermLabdaPure {
         self.update_set_var_bound(&mut set);
         set
     }
+
+    fn update_set_var_free(&self, set: &mut HashSet<String>) {
+        match self {
+            TermLabdaPure::Var { name } => {
+                set.insert(name.clone());
+            }
+            TermLabdaPure::App { term_left, term_right, .. } => {
+                term_right.update_set_var_free(set);
+                term_left.update_set_var_free(set);
+            }
+            TermLabdaPure::Lam { name, term } => {
+                term.update_set_var_free(set);
+                set.remove(name);
+            }
+            TermLabdaPure::Dup {
+                name_copied,
+                name_copy_1,
+                name_copy_2,
+                term,
+            } => {
+                term.update_set_var_free(set);
+                set.remove(name_copy_2);
+                set.remove(name_copy_1);
+                set.insert(name_copied.clone());
+            }
+            TermLabdaPure::Des { name_dropped, term } => {
+                term.update_set_var_free(set);
+                set.insert(name_dropped.clone());
+            }
+        }
+    }
+
+    fn set_var_free(&self) -> HashSet<String> {
+        let mut set = HashSet::new();
+        self.update_set_var_free(&mut set);
+        set
+    }
 }
 
 fn main() {
