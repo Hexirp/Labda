@@ -292,6 +292,67 @@ impl TermLabdaPure {
         self.update_set_var_free(&mut set);
         set
     }
+
+    fn update_set_var_conf(
+        &self,
+        flag_bound: bool,
+        flag_free: bool,
+        set: &mut HashSet<String>,
+    ) {
+        match self {
+            TermLabdaPure::Var { name } => {
+                if flag_free {
+                    set.insert(name.clone());
+                }
+            }
+            TermLabdaPure::App { term_left, term_right, .. } => {
+                term_right.update_set_var_conf(flag_bound, flag_free, set);
+                term_left.update_set_var_conf(flag_bound, flag_free, set);
+            }
+            TermLabdaPure::Lam { name, term } => {
+                term.update_set_var_conf(flag_bound, flag_free, set);
+                if flag_bound {
+                    set.insert(name.clone());
+                } else {
+                    set.remove(name);
+                }
+            }
+            TermLabdaPure::Dup {
+                name_copied,
+                name_copy_1,
+                name_copy_2,
+                term,
+            } => {
+                term.update_set_var_conf(flag_bound, flag_free, set);
+                if flag_bound {
+                    set.insert(name_copy_2.clone());
+                    set.insert(name_copy_1.clone());
+                } else {
+                    set.remove(name_copy_2);
+                    set.remove(name_copy_1);
+                }
+                if flag_free {
+                    set.insert(name_copied.clone());
+                }
+            }
+            TermLabdaPure::Des { name_dropped, term } => {
+                term.update_set_var_conf(flag_bound, flag_free, set);
+                if flag_free {
+                    set.insert(name_dropped.clone());
+                }
+            }
+        }
+    }
+
+    fn set_var_conf(
+        &self,
+        flag_bound: bool,
+        flag_free: bool,
+    ) -> HashSet<String> {
+        let mut set = HashSet::new();
+        self.update_set_var_conf(flag_bound, flag_free, &mut set);
+        set
+    }
 }
 
 fn main() {
