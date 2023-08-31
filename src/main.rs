@@ -311,6 +311,7 @@ impl TermLabdaPure {
             }
             TermLabdaPure::Lam { name, term } => {
                 term.update_set_var_conf(flag_bound, flag_free, set);
+
                 if flag_bound {
                     set.insert(name.clone());
                 } else {
@@ -324,6 +325,7 @@ impl TermLabdaPure {
                 term,
             } => {
                 term.update_set_var_conf(flag_bound, flag_free, set);
+
                 if flag_bound {
                     set.insert(name_copy_2.clone());
                     set.insert(name_copy_1.clone());
@@ -331,12 +333,14 @@ impl TermLabdaPure {
                     set.remove(name_copy_2);
                     set.remove(name_copy_1);
                 }
+
                 if flag_free {
                     set.insert(name_copied.clone());
                 }
             }
             TermLabdaPure::Des { name_dropped, term } => {
                 term.update_set_var_conf(flag_bound, flag_free, set);
+
                 if flag_free {
                     set.insert(name_dropped.clone());
                 }
