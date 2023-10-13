@@ -2,18 +2,9 @@ use std::collections::HashSet;
 
 enum TermLabdaPure {
     Var { name: String },
-    App {
-        term_left: Box<TermLabdaPure>,
-        term_right: Box<TermLabdaPure>,
-        strategy: bool,
-    },
+    App { term_left: Box<TermLabdaPure>, term_right: Box<TermLabdaPure>, strategy: bool },
     Lam { name: String, term: Box<TermLabdaPure> },
-    Dup {
-        name_copied: String,
-        name_copy_1: String,
-        name_copy_2: String,
-        term: Box<TermLabdaPure>,
-    },
+    Dup { name_copied: String, name_copy_1: String, name_copy_2: String, term: Box<TermLabdaPure> },
     Des { name_dropped: String, term: Box<TermLabdaPure> },
 }
 
@@ -31,12 +22,7 @@ impl TermLabdaPure {
                 let x_term = term.is_used(name_target);
                 x_var || x_term
             }
-            TermLabdaPure::Dup {
-                name_copied,
-                name_copy_1,
-                name_copy_2,
-                term,
-            } => {
+            TermLabdaPure::Dup { name_copied, name_copy_1, name_copy_2, term } => {
                 let x_copied = name_copied == name_target;
                 let x_copy_1 = name_copy_1 == name_target;
                 let x_copy_2 = name_copy_2 == name_target;
@@ -89,12 +75,7 @@ impl TermLabdaPure {
                 let x_term = term.is_used_free(name_target);
                 !x_var && x_term
             }
-            TermLabdaPure::Dup {
-                name_copied,
-                name_copy_1,
-                name_copy_2,
-                term,
-            } => {
+            TermLabdaPure::Dup { name_copied, name_copy_1, name_copy_2, term } => {
                 let x_copied = name_copied == name_target;
                 let x_copy_1 = name_copy_1 == name_target;
                 let x_copy_2 = name_copy_2 == name_target;
@@ -110,12 +91,7 @@ impl TermLabdaPure {
         }
     }
 
-    fn is_used_conf(
-        &self,
-        flag_bound: bool,
-        flag_free: bool,
-        name_target: &String,
-    ) -> bool {
+    fn is_used_conf(&self, flag_bound: bool, flag_free: bool, name_target: &String) -> bool {
         match self {
             TermLabdaPure::Var { name } => {
                 if flag_free {
@@ -125,37 +101,20 @@ impl TermLabdaPure {
                 }
             }
             TermLabdaPure::App { term_left, term_right, .. } => {
-                let x_left = term_left.is_used_conf(
-                    flag_bound,
-                    flag_free,
-                    name_target,
-                );
-                let x_right = term_right.is_used_conf(
-                    flag_bound,
-                    flag_free,
-                    name_target,
-                );
+                let x_left = term_left.is_used_conf(flag_bound, flag_free, name_target);
+                let x_right = term_right.is_used_conf(flag_bound, flag_free, name_target);
                 x_left || x_right
             }
             TermLabdaPure::Lam { name, term } => {
                 let x_var = name == name_target;
-                let x_term = term.is_used_conf(
-                    flag_bound,
-                    flag_free,
-                    name_target,
-                );
+                let x_term = term.is_used_conf(flag_bound, flag_free, name_target);
                 if x_var {
                     flag_bound
                 } else {
                     x_term
                 }
             }
-            TermLabdaPure::Dup {
-                name_copied,
-                name_copy_1,
-                name_copy_2,
-                term,
-            } => {
+            TermLabdaPure::Dup { name_copied, name_copy_1, name_copy_2, term } => {
                 let x_copied = if flag_free {
                     name_copied == name_target
                 } else {
@@ -163,11 +122,7 @@ impl TermLabdaPure {
                 };
                 let x_copy_1 = name_copy_1 == name_target;
                 let x_copy_2 = name_copy_2 == name_target;
-                let x_term = term.is_used_conf(
-                    flag_bound,
-                    flag_free,
-                    name_target,
-                );
+                let x_term = term.is_used_conf(flag_bound, flag_free, name_target);
                 let x_lambda = if x_copy_1 || x_copy_2 {
                     flag_bound
                 } else {
@@ -181,11 +136,7 @@ impl TermLabdaPure {
                 } else {
                     false
                 };
-                let x_term = term.is_used_conf(
-                    flag_bound,
-                    flag_free,
-                    name_target,
-                );
+                let x_term = term.is_used_conf(flag_bound, flag_free, name_target);
                 x_dropped || x_term
             }
         }
@@ -204,12 +155,7 @@ impl TermLabdaPure {
                 term.update_set_var(set);
                 set.insert(name.clone());
             }
-            TermLabdaPure::Dup {
-                name_copied,
-                name_copy_1,
-                name_copy_2,
-                term,
-            } => {
+            TermLabdaPure::Dup { name_copied, name_copy_1, name_copy_2, term } => {
                 term.update_set_var(set);
                 set.insert(name_copy_2.clone());
                 set.insert(name_copy_1.clone());
@@ -269,12 +215,7 @@ impl TermLabdaPure {
                 term.update_set_var_free(set);
                 set.remove(name);
             }
-            TermLabdaPure::Dup {
-                name_copied,
-                name_copy_1,
-                name_copy_2,
-                term,
-            } => {
+            TermLabdaPure::Dup { name_copied, name_copy_1, name_copy_2, term } => {
                 term.update_set_var_free(set);
                 set.remove(name_copy_2);
                 set.remove(name_copy_1);
@@ -293,12 +234,7 @@ impl TermLabdaPure {
         set
     }
 
-    fn update_set_var_conf(
-        &self,
-        flag_bound: bool,
-        flag_free: bool,
-        set: &mut HashSet<String>,
-    ) {
+    fn update_set_var_conf(&self, flag_bound: bool, flag_free: bool, set: &mut HashSet<String>) {
         match self {
             TermLabdaPure::Var { name } => {
                 if flag_free {
@@ -318,12 +254,7 @@ impl TermLabdaPure {
                     set.remove(name);
                 }
             }
-            TermLabdaPure::Dup {
-                name_copied,
-                name_copy_1,
-                name_copy_2,
-                term,
-            } => {
+            TermLabdaPure::Dup { name_copied, name_copy_1, name_copy_2, term } => {
                 term.update_set_var_conf(flag_bound, flag_free, set);
 
                 if flag_bound {
@@ -348,11 +279,7 @@ impl TermLabdaPure {
         }
     }
 
-    fn set_var_conf(
-        &self,
-        flag_bound: bool,
-        flag_free: bool,
-    ) -> HashSet<String> {
+    fn set_var_conf(&self, flag_bound: bool, flag_free: bool) -> HashSet<String> {
         let mut set = HashSet::new();
         self.update_set_var_conf(flag_bound, flag_free, &mut set);
         set
