@@ -495,116 +495,53 @@ exact t_5.
 Defined.
 ```
 
-これでは定義が複雑すぎるため、もう少し定義を省略できないか試みる。
+`reset` 関数と `shift` 関数は次の形をしている。
+
+```txt
+reset : ((A -> A) -> A) -> (A -> B) -> B
+reset = \ (x : (A -> A) -> A) -> \ (y : A -> B) -> y (x (\ (z : A) -> z))
+
+shift : ((A -> (B -> B) -> B) -> (B -> B) -> B) -> (A -> B) -> B
+shift = \ (x : (A -> (B -> B) -> B) -> (B -> B) -> B) -> \ (y : A -> B) -> x (\ (z : A) -> \ (w : B -> B) -> w (y z)) (\ (v : B) -> v)
+
+shift : ((((A -> (B -> B) -> B) -> B) -> B) -> (B -> B) -> B) -> (A -> B) -> B
+shift = \ (x : (((A -> (B -> B) -> B) -> B) -> B) -> (B -> B) -> B) -> \ (y : A -> B) -> x (\ (z : ((A -> (B -> B) -> B) -> B) -> B) -> z (\ (w : A) -> \ (v : B -> B) -> v (y w))) (\ (u : B) -> u)
+```
+
+モナドの言葉を使って表現することを試みる。
 
 ```txt
 double_negation_shift : ((((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> C) -> C
 double_negation_shift = \ k_0 -> k_0 (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5))))
 
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C
-double_negation_shift = \ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5)))
+double_negation_shift : Continue C (((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C)
+double_negation_shift = pure (\ x -> \ k_1 -> k_1 (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5))))
 
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
-double_negation_shift = \ x -> \ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5))
+double_negation_shift : Continue C (((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> Continue C ((((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C))
+double_negation_shift = pure (\ x -> pure (\ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5))))
 
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> C
-double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5)
+double_negation_shift : Continue C (((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> Continue C ((((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> Continue C C))
+double_negation_shift = pure (\ x -> pure (\ y -> reset (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))))))
 
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
-double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11)))
+double_negation_shift : Continue C (((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> Continue C ((((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> Continue C C))
+double_negation_shift = pure (\ x -> pure (\ y -> reset (y (\ z -> \ k_7 -> shift (x z) k_7))))
 
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
-double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8))))
-
-double_negation_shift : ((x : A) -> (((B x -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
-double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> k_7 t_8)))
-
-double_negation_shift : ((x : A) -> (((B x -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
-double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> k_7 t_8)))
-
-double_negation_shift : ((x : A) -> (B x -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
-double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z (\ t_8 -> k_7 t_8))
-
-double_negation_shift : ((x : A) -> (B x -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
-double_negation_shift = \ x -> \ y -> y (\ z -> \ k_7 -> x z k_7)
-
-double_negation_shift : ((x : A) -> (B x -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> C) -> C
-double_negation_shift = \ x -> \ y -> y (\ z -> x z)
-
-double_negation_shift : ((x : A) -> B x) -> (((x : A) -> B x) -> C) -> C
-double_negation_shift = \ x -> \ y -> y x
-
-double_negation_shift : ((x : A) -> B x) -> (x : A) -> B x
-double_negation_shift = \ x -> x
+double_negation_shift : Continue C (((x : A) -> (Continue C ((B x -> Continue C C) -> Continue C C))) -> Continue C ((((x : A) -> Continue C (B x)) -> Continue C C) -> Continue C C))
+double_negation_shift = pure (\ x -> pure (\ y -> reset (y (\ z -> shift (x z)))))
 ```
 
-恒等関数となった。そういえば、継続モナドは簡略化していくと普通の関数になっちゃうんだった。どこかで簡略化を止めないといけない。
+これでは定義が複雑すぎるため、もう少し定義を省略できないか試みる。
 
 ```txt
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
-double_negation_shift = \ x -> \ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5))
+double_negation_shift : Continue C (((x : A) -> (Continue C ((B x -> Continue C C) -> Continue C C))) -> Continue C ((((x : A) -> Continue C (B x)) -> Continue C C) -> Continue C C))
+double_negation_shift = pure (\ x -> pure (\ y -> reset (y (\ z -> shift (x z)))))
+
+double_negation_shift : ((x : A) -> (Continue C ((B x -> Continue C C) -> Continue C C))) -> Continue C ((((x : A) -> Continue C (B x)) -> Continue C C) -> Continue C C)
+double_negation_shift = \ x -> pure (\ y -> reset (y (\ z -> shift (x z))))
+
+double_negation_shift : ((x : A) -> (Continue C ((B x -> Continue C C) -> Continue C C))) -> (((x : A) -> Continue C (B x)) -> Continue C C) -> Continue C C
+double_negation_shift = \ x -> \ y -> reset (y (\ z -> shift (x z)))
 ```
-
-`reset` 関数と `shift` 関数の形が消えない所で止めることにする。そうなると、やっぱり、この辺りだろうか？
-
-```
-reset : ((A -> A) -> A) -> (A -> B) -> B
-reset = \ (x : (A -> A) -> A) -> \ (y : A -> B) -> y (x (\ (z : A) -> z))
-```
-
-`reset` 関数は、この形をしている。
-
-```txt
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
-double_negation_shift = \ x -> \ y -> \ k_3 -> k_3 (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))) (\ t_5 -> t_5))
-
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
-double_negation_shift = \ x -> \ y -> reset (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))))
-```
-
-`reset` 関数を使う形に書き換える。
-
-```txt
-shift : ((A -> (B -> B) -> B) -> (B -> B) -> B) -> (A -> B) -> B
-shift = \ (x : (A -> (B -> B) -> B) -> (B -> B) -> B) -> \ (y : A -> B) -> x (\ (z : A) -> \ (w : B -> B) -> w (y z)) (\ (v : B) -> v)
-```
-
-`shift` 関数は、この形をしている。
-
-```txt
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
-double_negation_shift = \ x -> \ y -> reset (y (\ z -> \ k_7 -> x z (\ t_9 -> t_9 (\ t_8 -> \ k_9 -> k_9 (k_7 t_8)) (\ t_11 -> t_11))))
-
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
-double_negation_shift = \ x -> \ y -> reset (y (\ z -> shift (\ w -> \ v -> x z (\ u -> u w v))))
-```
-
-`shift` 関数を使う形に書き換える。
-
-もっと単純な形にしたい。
-
-```txt
-bind : ((A -> C) -> C) -> (A -> (B -> C) -> C) -> (B -> C) -> C
-bind = \ (x : (A -> C) -> C) -> \ (y : A -> (B -> C) -> C) -> \ (z : B -> C) -> x (\ (w : A) -> y w z)
-```
-
-`bind` 関数は、この形である。
-
-```txt
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
-double_negation_shift = \ x -> \ y -> reset (y (\ z -> shift (\ w -> \ v -> x z (\ u -> u w v))))
-
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
-double_negation_shift = \ x -> \ y -> reset (y (\ z -> shift (\ w -> \ v -> x z (\ u -> (\ t -> t w) u v))))
-
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
-double_negation_shift = \ x -> \ y -> reset (y (\ z -> shift (\ w -> \ v -> x z (\ u -> (\ t -> t w) u v))))
-
-double_negation_shift : ((x : A) -> (((B x -> (C -> C) -> C) -> (C -> C) -> C) -> C) -> C) -> (((x : A) -> (B x -> C) -> C) -> (C -> C) -> C) -> (C -> C) -> C
-double_negation_shift = \ x -> \ y -> reset (y (\ z -> shift (\ w -> bind (x z) (\ t -> t w))))
-```
-
-おそらく、これ以上は省略できない。
 
 "[Delimited control operators prove Double-negation Shift](https://arxiv.org/abs/1012.0929)" は、要するに、全ての関数に継続の文脈が乗っていることを前提にしているわけだ。では、 Labda の全ての関数に継続の文脈が乗っていることにすればよいかというと、それは難しい。一つ目に、それでは構成的な議論と非構成的な議論の分離が出来なくなる。二つ目に、関数そのものの内容が型を変え得るようなフルの依存型を含む理論に継続を乗せることは大変難しい。三つ目に、 HoTT の公理と矛盾してしまう。
 
