@@ -19,6 +19,19 @@ impl LambdaCalculusVariableName {
             LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } => self == variable_name || self.is_used_in(expression),
         }
     }
+
+    fn is_free_variable_in(&self, expression: &LambdaCalculusExpression) -> bool {
+        match expression {
+            LambdaCalculusExpression::Variable { name } =>
+                self == name,
+
+            LambdaCalculusExpression::Application { function_part, argument_part } =>
+                self.is_free_variable_in(function_part) || self.is_free_variable_in(argument_part),
+
+            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } =>
+                self != variable_name && self.is_free_variable_in(expression),
+        }
+    }
 }
 
 fn main() {
