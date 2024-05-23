@@ -103,6 +103,31 @@ impl LambdaCalculusExpression {
 
         set
     }
+
+    fn update_bound_variable_set(expression: &LambdaCalculusExpression, set: &mut HashSet<LambdaCalculusVariableName>) {
+        match expression {
+            LambdaCalculusExpression::Variable { name } => {
+            }
+
+            LambdaCalculusExpression::Application { function_part, argument_part } => {
+                Self::update_bound_variable_set(function_part, set);
+                Self::update_bound_variable_set(argument_part, set);
+            }
+
+            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } => {
+                Self::update_bound_variable_set(expression, set);
+                set.insert(variable_name.clone());
+            }
+        }
+    }
+
+    fn collect_bound_variable(&self) -> HashSet<LambdaCalculusVariableName> {
+        let mut set = HashSet::new();
+
+        Self::update_bound_variable_set(self, &mut set);
+
+        set
+    }
 }
 
 fn main() {
