@@ -158,4 +158,23 @@ fn main() {
         assert_eq!(x.is_bound_variable_in(&y), false);
         assert_eq!(x.is_bound_variable_in(&z), true);
     }
+
+    {
+        let x = LambdaCalculusVariableName { string: "a".to_string() };
+        let y = LambdaCalculusVariableName { string: "b".to_string() };
+        let z = LambdaCalculusExpression::Application {
+            function_part: Box::new(LambdaCalculusExpression::Variable { name: x.clone() }),
+            argument_part: Box::new(LambdaCalculusExpression::LambdaAbstraction {
+                variable_name: y.clone(),
+                expression: Box::new(LambdaCalculusExpression::LambdaAbstraction {
+                    variable_name: x.clone(),
+                    expression: Box::new(LambdaCalculusExpression::Variable { name: y.clone()})
+                })
+            }),
+        };
+
+        println!("{:?}", z.collect_variable());
+        println!("{:?}", z.collect_free_variable());
+        println!("{:?}", z.collect_bound_variable());
+    }
 }
