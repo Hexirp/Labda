@@ -105,7 +105,7 @@ impl LambdaCalculusExpression {
                 let mut set = HashSet::new();
 
                 set.extend(expression.collect_free_variable());
-                set.remove(&variable_name.clone());
+                set.remove(variable_name);
 
                 set
             }
