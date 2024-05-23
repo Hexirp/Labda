@@ -34,6 +34,19 @@ impl LambdaCalculusVariableName {
                 self != variable_name && self.is_free_variable_in(expression),
         }
     }
+
+    fn is_bound_variable_in(&self, expression: &LambdaCalculusExpression) -> bool {
+        match expression {
+            LambdaCalculusExpression::Variable { name } =>
+                false,
+
+            LambdaCalculusExpression::Application { function_part, argument_part } =>
+                self.is_bound_variable_in(function_part) || self.is_bound_variable_in(argument_part),
+
+            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } =>
+                self == variable_name || self.is_bound_variable_in(expression),
+        }
+    }
 }
 
 fn main() {
@@ -61,5 +74,7 @@ fn main() {
         assert_eq!(x.is_variable_in(&z), true);
         assert_eq!(x.is_free_variable_in(&y), true);
         assert_eq!(x.is_free_variable_in(&z), false);
+        assert_eq!(x.is_bound_variable_in(&y), false);
+        assert_eq!(x.is_bound_variable_in(&z), true);
     }
 }
