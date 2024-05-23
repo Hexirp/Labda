@@ -65,8 +65,8 @@ impl LambdaCalculusExpression {
             LambdaCalculusExpression::Application { function_part, argument_part } => {
                 let mut set = HashSet::new();
 
-                set.union(&function_part.collect_variable());
-                set.union(&argument_part.collect_variable());
+                set.extend(function_part.collect_variable());
+                set.extend(argument_part.collect_variable());
 
                 set
             }
@@ -74,7 +74,7 @@ impl LambdaCalculusExpression {
             LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } => {
                 let mut set = HashSet::new();
 
-                set.union(&expression.collect_variable());
+                set.extend(expression.collect_variable());
                 set.insert(variable_name.clone());
 
                 set
