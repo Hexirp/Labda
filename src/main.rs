@@ -39,7 +39,7 @@ impl LambdaCalculusVariableName {
 
     fn is_bound_variable_in(&self, expression: &LambdaCalculusExpression) -> bool {
         match expression {
-            LambdaCalculusExpression::Variable { name } =>
+            LambdaCalculusExpression::Variable { name: _ } =>
                 false,
 
             LambdaCalculusExpression::Application { function_part, argument_part } =>
@@ -106,7 +106,7 @@ impl LambdaCalculusExpression {
 
     fn update_bound_variable_set(expression: &LambdaCalculusExpression, set: &mut HashSet<LambdaCalculusVariableName>) {
         match expression {
-            LambdaCalculusExpression::Variable { name } => {
+            LambdaCalculusExpression::Variable { name: _ } => {
             }
 
             LambdaCalculusExpression::Application { function_part, argument_part } => {
