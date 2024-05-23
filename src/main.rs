@@ -77,6 +77,32 @@ impl LambdaCalculusExpression {
 
         set
     }
+
+    fn update_free_variable_set(expression: &LambdaCalculusExpression, set: &mut HashSet<LambdaCalculusVariableName>) {
+        match expression {
+            LambdaCalculusExpression::Variable { name } => {
+                set.insert(name.clone());
+            }
+
+            LambdaCalculusExpression::Application { function_part, argument_part } => {
+                Self::update_free_variable_set(function_part, set);
+                Self::update_free_variable_set(argument_part, set);
+            }
+
+            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } => {
+                Self::update_free_variable_set(expression, set);
+                set.remove(&variable_name.clone());
+            }
+        }
+    }
+
+    fn collect_free_variable(&self) -> HashSet<LambdaCalculusVariableName> {
+        let mut set = HashSet::new();
+
+        Self::update_free_variable_set(self, &mut set);
+
+        set
+    }
 }
 
 fn main() {
