@@ -9,14 +9,16 @@ enum LambdaCalculusExpression {
 }
 
 impl LambdaCalculusVariableName {
-    fn is_used_in(&self, expression: &LambdaCalculusExpression) -> bool {
+    fn is_variable_in(&self, expression: &LambdaCalculusExpression) -> bool {
         match expression {
-            LambdaCalculusExpression::Variable { name } => self == name,
+            LambdaCalculusExpression::Variable { name } =>
+                self == name,
 
             LambdaCalculusExpression::Application { function_part, argument_part } =>
-                self.is_used_in(function_part) || self.is_used_in(argument_part),
+                self.is_variable_in(function_part) || self.is_variable_in(argument_part),
 
-            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } => self == variable_name || self.is_used_in(expression),
+            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } =>
+                self == variable_name || self.is_variable_in(expression),
         }
     }
 
@@ -46,6 +48,6 @@ fn main() {
     println!("{:?}", x_003);
     let x_004 = LambdaCalculusExpression::LambdaAbstraction { variable_name: x_000.clone(), expression: Box::new(x_002.clone()) };
     println!("{:?}", x_004);
-    let x_005 = &x_000.is_used_in(&x_001);
-    println!("{:?}", x_005)
+    let x_005 = &x_000.is_variable_in(&x_001);
+    println!("{:?}", x_005);
 }
