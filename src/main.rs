@@ -91,7 +91,7 @@ impl LambdaCalculusExpression {
 
             LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } => {
                 Self::update_free_variable_set(expression, set);
-                set.remove(&variable_name.clone());
+                set.remove(variable_name);
             }
         }
     }
