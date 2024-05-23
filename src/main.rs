@@ -1,7 +1,9 @@
-#[derive(Clone, PartialEq, Eq, Debug)]
+use std::collections::HashSet;
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 struct LambdaCalculusVariableName { string: String }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 enum LambdaCalculusExpression {
     Variable { name: LambdaCalculusVariableName },
     Application { function_part: Box<LambdaCalculusExpression>, argument_part: Box<LambdaCalculusExpression> },
@@ -46,6 +48,34 @@ impl LambdaCalculusVariableName {
             LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } =>
                 self == variable_name || self.is_bound_variable_in(expression),
         }
+    }
+}
+
+impl LambdaCalculusExpression {
+    fn update_variable_set(expression: &LambdaCalculusExpression, set: &mut HashSet<LambdaCalculusVariableName>) {
+        match expression {
+            LambdaCalculusExpression::Variable { name } => {
+                set.insert(name.clone());
+            }
+
+            LambdaCalculusExpression::Application { function_part, argument_part } => {
+                Self::update_variable_set(function_part, set);
+                Self::update_variable_set(argument_part, set);
+            }
+
+            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } => {
+                Self::update_variable_set(expression, set);
+                set.insert(variable_name.clone());
+            }
+        }
+    }
+
+    fn collect_variable(&self) -> HashSet<LambdaCalculusVariableName> {
+        let mut set = HashSet::new();
+
+        Self::update_variable_set(self, &mut set);
+
+        set
     }
 }
 
