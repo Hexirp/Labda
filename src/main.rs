@@ -152,6 +152,120 @@ impl LambdaCalculusExpression {
     }
 }
 
+#[test]
+fn test_x_is_variable_in_y() {
+    let x = LambdaCalculusVariableName { string: "a".to_string() };
+    let y = LambdaCalculusExpression::Variable { name: x.clone() };
+
+    assert_eq!(x.is_variable_in(&y), true);
+}
+
+#[test]
+fn test_x_is_variable_in_z() {
+    let x = LambdaCalculusVariableName { string: "a".to_string() };
+    let y = LambdaCalculusExpression::Variable { name: x.clone() };
+    let z = LambdaCalculusExpression::LambdaAbstraction { bound_variable_name: x.clone(), expression: Box::new(y.clone()) };
+
+    assert_eq!(x.is_variable_in(&z), true);
+}
+
+#[test]
+fn test_x_is_free_variable_in_y() {
+    let x = LambdaCalculusVariableName { string: "a".to_string() };
+    let y = LambdaCalculusExpression::Variable { name: x.clone() };
+
+    assert_eq!(x.is_free_variable_in(&y), true);
+}
+
+#[test]
+fn test_x_is_free_variable_in_z() {
+    let x = LambdaCalculusVariableName { string: "a".to_string() };
+    let y = LambdaCalculusExpression::Variable { name: x.clone() };
+    let z = LambdaCalculusExpression::LambdaAbstraction { bound_variable_name: x.clone(), expression: Box::new(y.clone()) };
+
+    assert_eq!(x.is_free_variable_in(&z), false);
+}
+
+#[test]
+fn test_x_is_bound_variable_in_y() {
+    let x = LambdaCalculusVariableName { string: "a".to_string() };
+    let y = LambdaCalculusExpression::Variable { name: x.clone() };
+
+    assert_eq!(x.is_bound_variable_in(&y), false);
+}
+
+#[test]
+fn test_x_is_bound_variable_in_z() {
+    let x = LambdaCalculusVariableName { string: "a".to_string() };
+    let y = LambdaCalculusExpression::Variable { name: x.clone() };
+    let z = LambdaCalculusExpression::LambdaAbstraction { bound_variable_name: x.clone(), expression: Box::new(y.clone()) };
+
+    assert_eq!(x.is_bound_variable_in(&z), true);
+}
+
+#[test]
+fn test_z_collect_variable() {
+    let x = LambdaCalculusVariableName { string: "a".to_string() };
+    let y = LambdaCalculusVariableName { string: "b".to_string() };
+    let z = LambdaCalculusExpression::Application {
+        function_part: Box::new(LambdaCalculusExpression::Variable { name: x.clone() }),
+        argument_part: Box::new(LambdaCalculusExpression::LambdaAbstraction {
+            bound_variable_name: y.clone(),
+            expression: Box::new(LambdaCalculusExpression::LambdaAbstraction {
+                bound_variable_name: x.clone(),
+                expression: Box::new(LambdaCalculusExpression::Variable { name: y.clone()})
+            })
+        }),
+    };
+
+    assert_eq!(
+        z.collect_variable(),
+        vec![LambdaCalculusVariableName { string: "a".to_string() }, LambdaCalculusVariableName { string: "b".to_string() }].into_iter().collect(),
+    );
+}
+
+#[test]
+fn test_z_collect_free_variable() {
+    let x = LambdaCalculusVariableName { string: "a".to_string() };
+    let y = LambdaCalculusVariableName { string: "b".to_string() };
+    let z = LambdaCalculusExpression::Application {
+        function_part: Box::new(LambdaCalculusExpression::Variable { name: x.clone() }),
+        argument_part: Box::new(LambdaCalculusExpression::LambdaAbstraction {
+            bound_variable_name: y.clone(),
+            expression: Box::new(LambdaCalculusExpression::LambdaAbstraction {
+                bound_variable_name: x.clone(),
+                expression: Box::new(LambdaCalculusExpression::Variable { name: y.clone()})
+            })
+        }),
+    };
+
+    assert_eq!(
+        z.collect_free_variable(),
+        vec![LambdaCalculusVariableName { string: "a".to_string() }].into_iter().collect(),
+    );
+}
+
+#[test]
+fn test_z_collect_bound_variable() {
+    let x = LambdaCalculusVariableName { string: "a".to_string() };
+    let y = LambdaCalculusVariableName { string: "b".to_string() };
+    let z = LambdaCalculusExpression::Application {
+        function_part: Box::new(LambdaCalculusExpression::Variable { name: x.clone() }),
+        argument_part: Box::new(LambdaCalculusExpression::LambdaAbstraction {
+            bound_variable_name: y.clone(),
+            expression: Box::new(LambdaCalculusExpression::LambdaAbstraction {
+                bound_variable_name: x.clone(),
+                expression: Box::new(LambdaCalculusExpression::Variable { name: y.clone()})
+            })
+        }),
+    };
+
+    assert_eq!(
+        z.collect_bound_variable(),
+        vec![LambdaCalculusVariableName { string: "a".to_string() }, LambdaCalculusVariableName { string: "b".to_string() }].into_iter().collect(),
+    );
+}
+
 fn main() {
     println!("Hello, world!");
 
