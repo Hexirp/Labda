@@ -7,7 +7,7 @@ struct LambdaCalculusVariableName { string: String }
 enum LambdaCalculusExpression {
     Variable { name: LambdaCalculusVariableName },
     Application { function_part: Box<LambdaCalculusExpression>, argument_part: Box<LambdaCalculusExpression> },
-    LambdaAbstraction { variable_name: LambdaCalculusVariableName, expression: Box<LambdaCalculusExpression> },
+    LambdaAbstraction { bound_variable_name: LambdaCalculusVariableName, expression: Box<LambdaCalculusExpression> },
 }
 
 impl LambdaCalculusVariableName {
@@ -19,8 +19,8 @@ impl LambdaCalculusVariableName {
             LambdaCalculusExpression::Application { function_part, argument_part } =>
                 self.is_variable_in(function_part) || self.is_variable_in(argument_part),
 
-            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } =>
-                self == variable_name || self.is_variable_in(expression),
+            LambdaCalculusExpression::LambdaAbstraction { bound_variable_name, expression } =>
+                self == bound_variable_name || self.is_variable_in(expression),
         }
     }
 
@@ -32,8 +32,8 @@ impl LambdaCalculusVariableName {
             LambdaCalculusExpression::Application { function_part, argument_part } =>
                 self.is_free_variable_in(function_part) || self.is_free_variable_in(argument_part),
 
-            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } =>
-                self != variable_name && self.is_free_variable_in(expression),
+            LambdaCalculusExpression::LambdaAbstraction { bound_variable_name, expression } =>
+                self != bound_variable_name && self.is_free_variable_in(expression),
         }
     }
 
@@ -45,8 +45,8 @@ impl LambdaCalculusVariableName {
             LambdaCalculusExpression::Application { function_part, argument_part } =>
                 self.is_bound_variable_in(function_part) || self.is_bound_variable_in(argument_part),
 
-            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } =>
-                self == variable_name || self.is_bound_variable_in(expression),
+            LambdaCalculusExpression::LambdaAbstraction { bound_variable_name, expression } =>
+                self == bound_variable_name || self.is_bound_variable_in(expression),
         }
     }
 }
@@ -71,11 +71,11 @@ impl LambdaCalculusExpression {
                 set
             }
 
-            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } => {
+            LambdaCalculusExpression::LambdaAbstraction { bound_variable_name, expression } => {
                 let mut set = HashSet::new();
 
                 set.extend(expression.collect_variable());
-                set.insert(variable_name.clone());
+                set.insert(bound_variable_name.clone());
 
                 set
             }
@@ -101,11 +101,11 @@ impl LambdaCalculusExpression {
                 set
             }
 
-            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } => {
+            LambdaCalculusExpression::LambdaAbstraction { bound_variable_name, expression } => {
                 let mut set = HashSet::new();
 
                 set.extend(expression.collect_free_variable());
-                set.remove(variable_name);
+                set.remove(bound_variable_name);
 
                 set
             }
@@ -129,11 +129,11 @@ impl LambdaCalculusExpression {
                 set
             }
 
-            LambdaCalculusExpression::LambdaAbstraction { variable_name, expression } => {
+            LambdaCalculusExpression::LambdaAbstraction { bound_variable_name, expression } => {
                 let mut set = HashSet::new();
 
                 set.extend(expression.collect_variable());
-                set.insert(variable_name.clone());
+                set.insert(bound_variable_name.clone());
 
                 set
             }
@@ -151,16 +151,16 @@ fn main() {
         println!("{:?}", y);
         let z = LambdaCalculusExpression::Application { function_part: Box::new(y.clone()), argument_part: Box::new(y.clone()) };
         println!("{:?}", z);
-        let w = LambdaCalculusExpression::LambdaAbstraction { variable_name: x.clone(), expression: Box::new(y.clone()) };
+        let w = LambdaCalculusExpression::LambdaAbstraction { bound_variable_name: x.clone(), expression: Box::new(y.clone()) };
         println!("{:?}", w);
-        let v = LambdaCalculusExpression::LambdaAbstraction { variable_name: x.clone(), expression: Box::new(z.clone()) };
+        let v = LambdaCalculusExpression::LambdaAbstraction { bound_variable_name: x.clone(), expression: Box::new(z.clone()) };
         println!("{:?}", v);
     }
 
     {
         let x = LambdaCalculusVariableName { string: "a".to_string() };
         let y = LambdaCalculusExpression::Variable { name: x.clone() };
-        let z = LambdaCalculusExpression::LambdaAbstraction { variable_name: x.clone(), expression: Box::new(y.clone()) };
+        let z = LambdaCalculusExpression::LambdaAbstraction { bound_variable_name: x.clone(), expression: Box::new(y.clone()) };
 
         assert_eq!(x.is_variable_in(&y), true);
         assert_eq!(x.is_variable_in(&z), true);
@@ -176,9 +176,9 @@ fn main() {
         let z = LambdaCalculusExpression::Application {
             function_part: Box::new(LambdaCalculusExpression::Variable { name: x.clone() }),
             argument_part: Box::new(LambdaCalculusExpression::LambdaAbstraction {
-                variable_name: y.clone(),
+                bound_variable_name: y.clone(),
                 expression: Box::new(LambdaCalculusExpression::LambdaAbstraction {
-                    variable_name: x.clone(),
+                    bound_variable_name: x.clone(),
                     expression: Box::new(LambdaCalculusExpression::Variable { name: y.clone()})
                 })
             }),
