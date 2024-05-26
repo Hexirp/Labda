@@ -10,6 +10,9 @@ enum LambdaCalculusExpression {
     LambdaAbstraction { bound_variable_name: LambdaCalculusVariableName, expression: Box<LambdaCalculusExpression> },
 }
 
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+struct LambdaCalculusLambdaAbstractionExpression { bound_variable_name: LambdaCalculusVariableName, expression: Box<LambdaCalculusExpression> }
+
 impl LambdaCalculusVariableName {
     fn is_variable_in(&self, expression: &LambdaCalculusExpression) -> bool {
         match expression {
@@ -140,17 +143,9 @@ impl LambdaCalculusExpression {
         }
     }
 
-    fn beta_reduce(function_part: &LambdaCalculusExpression, argument_part: &LambdaCalculusExpression) -> LambdaCalculusExpression {
+    fn beta_reduce(function_part: &LambdaCalculusLambdaAbstractionExpression, argument_part: &LambdaCalculusExpression) -> LambdaCalculusExpression {
         match function_part {
-            LambdaCalculusExpression::Variable { name: _ } => {
-                panic!("function_part should be lambda abstraction!");
-            }
-
-            LambdaCalculusExpression::Application { function_part: _, argument_part: _ } => {
-                panic!("function_part should be lambda abstraction!");
-            }
-
-            LambdaCalculusExpression::LambdaAbstraction { bound_variable_name: _, expression: _ } => {
+            LambdaCalculusLambdaAbstractionExpression { bound_variable_name: _, expression: _ } => {
                 todo!();
             }
         }
