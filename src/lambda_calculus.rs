@@ -152,6 +152,24 @@ impl Expression {
     }
 }
 
+impl LambdaAbstractionExpression {
+    pub fn new(expression: Expression) -> Option<Self> {
+        match expression {
+            Expression::Variable { name: _ } => {
+                Option::None
+            }
+
+            Expression::Application { function_part: _, argument_part: _ } => {
+                Option::None
+            }
+
+            Expression::LambdaAbstraction { bound_variable_name, expression } => {
+                Option::Some(LambdaAbstractionExpression { bound_variable_name, expression })
+            }
+        }
+    }
+}
+
 #[test]
 fn test_x_is_variable_in_y() {
     let x = VariableName { string: "a".to_string() };
