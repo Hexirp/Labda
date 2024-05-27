@@ -143,6 +143,10 @@ impl Expression {
         }
     }
 
+    pub fn collect_variable_captured_by(&self, variable_name: &VariableName) -> HashMap<VariableName> {
+        todo!()
+    }
+
     pub fn alpha_convert(expression: &LambdaAbstractionExpression, new_variable_name: &VariableName) -> Option<Expression> {
         todo!()
     }
