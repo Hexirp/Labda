@@ -11,7 +11,7 @@ pub enum Expression {
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-pub struct LambdaAbstractionExpression { bound_variable_name: VariableName, expression: Box<Expression> }
+pub struct LambdaAbstractionExpression { pub bound_variable_name: VariableName, pub expression: Box<Expression> }
 
 impl VariableName {
     pub fn is_variable_in(&self, expression: &Expression) -> bool {
