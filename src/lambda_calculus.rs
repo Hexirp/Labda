@@ -244,6 +244,7 @@ impl Expression {
         }
     }
 
+    // 本来は、 `self.collect_variable_captured_by(old_variable_name) に `new_variable_name` が含まれていないことが、 `rename` 関数が `Option::Some` を返すための必要十分条件になるはずである。しかし、現在は `self.collect_variable_captured_by(old_variable_name) に `new_variable_name` が含まれていなくても `Option::None` を返す場合がある。つまり、 `Option::None` を返すべき所で `Option::Some` を返すことはないが、 `Option::Some` を返すべき所で `Option::None` を返すことがある。最初にチェックを行い、その後で unsafe な rename 関数を呼び出すことで解決できるはずである。
     pub fn rename(self: Expression, old_variable_name: &VariableName, new_variable_name: &VariableName) -> Option<Expression> {
         match self {
             Expression::Variable { name } => {
