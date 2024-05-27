@@ -143,7 +143,7 @@ impl Expression {
         }
     }
 
-    pub fn collect_variable_captured_by(&self, variable_name: &VariableName) -> HashMap<VariableName> {
+    pub fn collect_variable_captured_by(&self, variable_name: &VariableName) -> HashSet<VariableName> {
         todo!()
     }
 
