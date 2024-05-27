@@ -244,10 +244,10 @@ impl Expression {
         }
     }
 
-    pub fn rename(expression: &Expression, old_variable_name: &VariableName, new_variable_name: &VariableName) -> Option<Expression> {
-        match expression {
+    pub fn rename(self: Expression, old_variable_name: &VariableName, new_variable_name: &VariableName) -> Option<Expression> {
+        match self {
             Expression::Variable { name } => {
-                if old_variable_name == name {
+                if *old_variable_name == name {
                     Option::Some(Expression::Variable { name: new_variable_name.clone() })
                 } else {
                     Option::Some(Expression::Variable { name: name.clone() })
@@ -255,19 +255,19 @@ impl Expression {
             }
 
             Expression::Application { function_part, argument_part } => {
-                let function_part_result = Self::rename(function_part, old_variable_name, new_variable_name)?;
-                let argument_part_result = Self::rename(argument_part, old_variable_name, new_variable_name)?;
+                let function_part_result = function_part.rename(old_variable_name, new_variable_name)?;
+                let argument_part_result = argument_part.rename(old_variable_name, new_variable_name)?;
 
                 Option::Some(Expression::Application { function_part: Box::new(function_part_result), argument_part: Box::new(argument_part_result) })
             }
 
             Expression::LambdaAbstraction { bound_variable_name, expression } => {
-                if new_variable_name == bound_variable_name {
+                if *new_variable_name == bound_variable_name {
                     Option::None
-                } else if old_variable_name == bound_variable_name {
+                } else if *old_variable_name == bound_variable_name {
                     Option::Some(Expression::LambdaAbstraction { bound_variable_name: bound_variable_name.clone(), expression: expression.clone() })
                 } else {
-                    let expression_result = Self::rename(expression, old_variable_name, new_variable_name)?;
+                    let expression_result = expression.rename(old_variable_name, new_variable_name)?;
 
                     Option::Some(Expression::LambdaAbstraction {
                         bound_variable_name: bound_variable_name.clone(),
