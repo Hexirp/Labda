@@ -143,6 +143,10 @@ impl Expression {
         }
     }
 
+    pub fn substitute(left_part: &Expression, variable_name: &VariableName, right_part: &Expression) -> Expression {
+        todo!();
+    }
+
     pub fn beta_reduce(function_part: &LambdaAbstractionExpression, argument_part: &Expression) -> Expression {
         match function_part {
             LambdaAbstractionExpression { bound_variable_name: _, expression: _ } => {
