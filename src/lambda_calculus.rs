@@ -204,64 +204,76 @@ fn test_x_is_bound_variable_in_z() {
 }
 
 #[test]
-fn test_z_collect_variable() {
+fn test_w_collect_variable() {
     let x = VariableName { string: "a".to_string() };
     let y = VariableName { string: "b".to_string() };
-    let z = Expression::Application {
+    let z = VariableName { string: "c".to_string() };
+    let w = Expression::Application {
         function_part: Box::new(Expression::Variable { name: x.clone() }),
         argument_part: Box::new(Expression::LambdaAbstraction {
             bound_variable_name: y.clone(),
             expression: Box::new(Expression::LambdaAbstraction {
                 bound_variable_name: x.clone(),
-                expression: Box::new(Expression::Variable { name: y.clone() })
-            })
+                expression: Box::new(Expression::Application {
+                    function_part: Box::new(Expression::Variable { name: y.clone() }),
+                    argument_part: Box::new(Expression::Variable { name: z.clone() }),
+                }),
+            }),
         }),
     };
 
     assert_eq!(
-        z.collect_variable(),
-        vec![VariableName { string: "a".to_string() }, VariableName { string: "b".to_string() }].into_iter().collect(),
+        w.collect_variable(),
+        vec![x.clone(), y.clone(), z.clone()].into_iter().collect(),
     );
 }
 
 #[test]
-fn test_z_collect_free_variable() {
+fn test_w_collect_free_variable() {
     let x = VariableName { string: "a".to_string() };
     let y = VariableName { string: "b".to_string() };
-    let z = Expression::Application {
+    let z = VariableName { string: "c".to_string() };
+    let w = Expression::Application {
         function_part: Box::new(Expression::Variable { name: x.clone() }),
         argument_part: Box::new(Expression::LambdaAbstraction {
             bound_variable_name: y.clone(),
             expression: Box::new(Expression::LambdaAbstraction {
                 bound_variable_name: x.clone(),
-                expression: Box::new(Expression::Variable { name: y.clone() })
-            })
+                expression: Box::new(Expression::Application {
+                    function_part: Box::new(Expression::Variable { name: y.clone() }),
+                    argument_part: Box::new(Expression::Variable { name: z.clone() }),
+                }),
+            }),
         }),
     };
 
     assert_eq!(
-        z.collect_free_variable(),
-        vec![VariableName { string: "a".to_string() }].into_iter().collect(),
+        w.collect_free_variable(),
+        vec![x.clone(), z.clone()].into_iter().collect(),
     );
 }
 
 #[test]
-fn test_z_collect_bound_variable() {
+fn test_w_collect_bound_variable() {
     let x = VariableName { string: "a".to_string() };
     let y = VariableName { string: "b".to_string() };
-    let z = Expression::Application {
+    let z = VariableName { string: "c".to_string() };
+    let w = Expression::Application {
         function_part: Box::new(Expression::Variable { name: x.clone() }),
         argument_part: Box::new(Expression::LambdaAbstraction {
             bound_variable_name: y.clone(),
             expression: Box::new(Expression::LambdaAbstraction {
                 bound_variable_name: x.clone(),
-                expression: Box::new(Expression::Variable { name: y.clone() })
-            })
+                expression: Box::new(Expression::Application {
+                    function_part: Box::new(Expression::Variable { name: y.clone() }),
+                    argument_part: Box::new(Expression::Variable { name: z.clone() }),
+                }),
+            }),
         }),
     };
 
     assert_eq!(
-        z.collect_bound_variable(),
-        vec![VariableName { string: "a".to_string() }, VariableName { string: "b".to_string() }].into_iter().collect(),
+        w.collect_bound_variable(),
+        vec![x.clone(), y.clone()].into_iter().collect(),
     );
 }
