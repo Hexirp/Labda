@@ -143,8 +143,105 @@ impl Expression {
         }
     }
 
+    fn inner_collect_variable_captured_by(&self, variable_name: &VariableName) -> Option<HashSet<VariableName>> {
+        match self {
+            Expression::Variable { name } => {
+                if variable_name == name {
+                    let set = HashSet::new();
+
+                    Option::Some(set)
+                } else {
+                    Option::None
+                }
+            }
+
+            Expression::Application { function_part, argument_part } => {
+                let function_part_result = function_part.inner_collect_variable_captured_by(variable_name);
+                let argument_part_result = argument_part.inner_collect_variable_captured_by(variable_name);
+
+                match function_part_result {
+                    Option::None => {
+                        match argument_part_result {
+                            Option::None => {
+                                Option::None
+                            }
+
+                            Option::Some(argument_part_result_set) => {
+                                let mut set = HashSet::new();
+
+                                set.extend(argument_part_result_set);
+
+                                Option::Some(set)
+                            }
+                        }
+                    }
+
+                    Option::Some(function_part_result_set) => {
+                        match argument_part_result {
+                            Option::None => {
+                                let mut set = HashSet::new();
+
+                                set.extend(function_part_result_set);
+
+                                Option::Some(set)
+                            }
+
+                            Option::Some(argument_part_result_set) => {
+                                let mut set = HashSet::new();
+
+                                set.extend(function_part_result_set);
+                                set.extend(argument_part_result_set);
+
+                                Option::Some(set)
+                            }
+                        }
+                    }
+                }
+            }
+
+            Expression::LambdaAbstraction { bound_variable_name, expression } => {
+                if variable_name == bound_variable_name {
+                    Option::None
+                } else {
+                    let expression_result = expression.inner_collect_variable_captured_by(variable_name);
+
+                    match expression_result {
+                        Option::None => {
+                            Option::None
+                        }
+
+                        Option::Some(expression_result_set) => {
+                            let mut set = HashSet::new();
+
+                            set.extend(expression_result_set);
+                            set.insert(bound_variable_name.clone());
+
+                            Option::Some(set)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     pub fn collect_variable_captured_by(&self, variable_name: &VariableName) -> HashSet<VariableName> {
-        todo!()
+        let result = self.inner_collect_variable_captured_by(variable_name);
+
+        match result {
+            Option::None => {
+                let set = HashSet::new();
+
+                set
+            }
+
+            Option::Some(result_set) => {
+                let mut set = HashSet::new();
+
+                set.extend(result_set);
+
+                set
+            }
+        }
     }
 
     pub fn alpha_convert(expression: &LambdaAbstractionExpression, new_variable_name: &VariableName) -> Option<Expression> {
