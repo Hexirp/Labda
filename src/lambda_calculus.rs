@@ -278,10 +278,6 @@ impl Expression {
         }
     }
 
-    pub fn alpha_convert(expression: &LambdaAbstractionExpression, new_variable_name: &VariableName) -> Option<Expression> {
-        todo!()
-    }
-
     pub fn substitute(left_part: &Expression, variable_name: &VariableName, right_part: &Expression) -> Expression {
         todo!();
     }
@@ -292,6 +288,14 @@ impl Expression {
                 todo!();
             }
         }
+    }
+}
+
+impl LambdaAbstractionExpression {
+    pub fn alpha_convert(self: LambdaAbstractionExpression, new_variable_name: &VariableName) -> Option<Expression> {
+        let LambdaAbstractionExpression { bound_variable_name, expression } = self;
+
+        expression.rename(&bound_variable_name, new_variable_name)
     }
 }
 
