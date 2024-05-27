@@ -38,7 +38,7 @@ fn main() {
                 bound_variable_name: y.clone(),
                 expression: Box::new(lambda_calculus::LambdaCalculusExpression::LambdaAbstraction {
                     bound_variable_name: x.clone(),
-                    expression: Box::new(lambda_calculus::LambdaCalculusExpression::Variable { name: y.clone()})
+                    expression: Box::new(lambda_calculus::LambdaCalculusExpression::Variable { name: y.clone() })
                 })
             }),
         };

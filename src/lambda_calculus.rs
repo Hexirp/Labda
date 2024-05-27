@@ -213,7 +213,7 @@ fn test_z_collect_variable() {
             bound_variable_name: y.clone(),
             expression: Box::new(LambdaCalculusExpression::LambdaAbstraction {
                 bound_variable_name: x.clone(),
-                expression: Box::new(LambdaCalculusExpression::Variable { name: y.clone()})
+                expression: Box::new(LambdaCalculusExpression::Variable { name: y.clone() })
             })
         }),
     };
@@ -234,7 +234,7 @@ fn test_z_collect_free_variable() {
             bound_variable_name: y.clone(),
             expression: Box::new(LambdaCalculusExpression::LambdaAbstraction {
                 bound_variable_name: x.clone(),
-                expression: Box::new(LambdaCalculusExpression::Variable { name: y.clone()})
+                expression: Box::new(LambdaCalculusExpression::Variable { name: y.clone() })
             })
         }),
     };
@@ -255,7 +255,7 @@ fn test_z_collect_bound_variable() {
             bound_variable_name: y.clone(),
             expression: Box::new(LambdaCalculusExpression::LambdaAbstraction {
                 bound_variable_name: x.clone(),
-                expression: Box::new(LambdaCalculusExpression::Variable { name: y.clone()})
+                expression: Box::new(LambdaCalculusExpression::Variable { name: y.clone() })
             })
         }),
     };
