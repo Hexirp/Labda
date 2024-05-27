@@ -135,7 +135,7 @@ impl Expression {
             Expression::LambdaAbstraction { bound_variable_name, expression } => {
                 let mut set = HashSet::new();
 
-                set.extend(expression.collect_variable());
+                set.extend(expression.collect_bound_variable());
                 set.insert(bound_variable_name.clone());
 
                 set
