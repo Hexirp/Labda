@@ -13,6 +13,9 @@ pub enum Expression {
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct LambdaAbstractionExpression { pub bound_variable_name: VariableName, pub expression: Expression }
 
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum CaptureSet { NoCapture, Capture(HashSet<VariableName>) }
+
 impl VariableName {
     pub fn is_variable_in(&self, expression: &Expression) -> bool {
         match expression {
@@ -143,103 +146,75 @@ impl Expression {
         }
     }
 
-    fn inner_collect_variable_captured_by(&self, variable_name: &VariableName) -> Option<HashSet<VariableName>> {
+    pub fn collect_variable_captured_by(&self, variable_name: &VariableName) -> CaptureSet {
         match self {
             Expression::Variable { name } => {
                 if variable_name == name {
                     let set = HashSet::new();
 
-                    Option::Some(set)
+                    CaptureSet::Capture(set)
                 } else {
-                    Option::None
+                    CaptureSet::NoCapture
                 }
             }
 
             Expression::Application { function_part, argument_part } => {
-                let function_part_result = function_part.inner_collect_variable_captured_by(variable_name);
-                let argument_part_result = argument_part.inner_collect_variable_captured_by(variable_name);
+                let function_part_result = function_part.collect_variable_captured_by(variable_name);
+                let argument_part_result = argument_part.collect_variable_captured_by(variable_name);
 
-                match function_part_result {
-                    Option::None => {
-                        match argument_part_result {
-                            Option::None => {
-                                Option::None
-                            }
-
-                            Option::Some(argument_part_result_set) => {
-                                let mut set = HashSet::new();
-
-                                set.extend(argument_part_result_set);
-
-                                Option::Some(set)
-                            }
-                        }
+                match (function_part_result, argument_part_result) {
+                    (CaptureSet::NoCapture, CaptureSet::NoCapture) => {
+                        CaptureSet::NoCapture
                     }
 
-                    Option::Some(function_part_result_set) => {
-                        match argument_part_result {
-                            Option::None => {
-                                let mut set = HashSet::new();
+                    (CaptureSet::Capture(function_part_result_set), CaptureSet::NoCapture) => {
+                        let mut set = HashSet::new();
 
-                                set.extend(function_part_result_set);
+                        set.extend(function_part_result_set);
 
-                                Option::Some(set)
-                            }
+                        CaptureSet::Capture(set)
+                    }
 
-                            Option::Some(argument_part_result_set) => {
-                                let mut set = HashSet::new();
+                    (CaptureSet::NoCapture, CaptureSet::Capture(argument_part_result_set)) => {
+                        let mut set = HashSet::new();
 
-                                set.extend(function_part_result_set);
-                                set.extend(argument_part_result_set);
+                        set.extend(argument_part_result_set);
 
-                                Option::Some(set)
-                            }
-                        }
+                        CaptureSet::Capture(set)
+                    }
+
+                    (CaptureSet::Capture(function_part_result_set), CaptureSet::Capture(argument_part_result_set)) => {
+                        let mut set = HashSet::new();
+
+                        set.extend(function_part_result_set);
+                        set.extend(argument_part_result_set);
+
+                        CaptureSet::Capture(set)
                     }
                 }
             }
 
             Expression::LambdaAbstraction { bound_variable_name, expression } => {
                 if variable_name == bound_variable_name {
-                    Option::None
+                    CaptureSet::NoCapture
                 } else {
-                    let expression_result = expression.inner_collect_variable_captured_by(variable_name);
+                    let expression_result = expression.collect_variable_captured_by(variable_name);
 
                     match expression_result {
-                        Option::None => {
-                            Option::None
+                        CaptureSet::NoCapture => {
+                            CaptureSet::NoCapture
                         }
 
-                        Option::Some(expression_result_set) => {
+                        CaptureSet::Capture(expression_result_set) => {
                             let mut set = HashSet::new();
 
                             set.extend(expression_result_set);
                             set.insert(bound_variable_name.clone());
 
-                            Option::Some(set)
+                            CaptureSet::Capture(set)
                         }
                     }
                 }
-            }
-        }
-    }
-
-    pub fn collect_variable_captured_by(&self, variable_name: &VariableName) -> HashSet<VariableName> {
-        let result = self.inner_collect_variable_captured_by(variable_name);
-
-        match result {
-            Option::None => {
-                let set = HashSet::new();
-
-                set
-            }
-
-            Option::Some(result_set) => {
-                let mut set = HashSet::new();
-
-                set.extend(result_set);
-
-                set
             }
         }
     }
@@ -447,7 +422,7 @@ fn test_w_collect_variable_captured_by_x() {
 
     assert_eq!(
         w.collect_variable_captured_by(&x),
-        vec![].into_iter().collect(),
+        CaptureSet::Capture(vec![].into_iter().collect()),
     );
 }
 
@@ -472,7 +447,7 @@ fn test_w_collect_variable_captured_by_y() {
 
     assert_eq!(
         w.collect_variable_captured_by(&y),
-        vec![].into_iter().collect(),
+        CaptureSet::NoCapture,
     );
 }
 
@@ -497,6 +472,6 @@ fn test_w_collect_variable_captured_by_z() {
 
     assert_eq!(
         w.collect_variable_captured_by(&z),
-        vec![x.clone(), y.clone()].into_iter().collect(),
+        CaptureSet::Capture(vec![x.clone(), y.clone()].into_iter().collect()),
     );
 }
