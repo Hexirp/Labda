@@ -248,36 +248,19 @@ impl Expression {
         }
     }
 
-    // 本来は、 `self.collect_variable_captured_by(old_variable_name) に `new_variable_name` が含まれていないことが、 `rename` 関数が `Option::Some` を返すための必要十分条件になるはずである。しかし、現在は `self.collect_variable_captured_by(old_variable_name) に `new_variable_name` が含まれていなくても `Option::None` を返す場合がある。つまり、 `Option::None` を返すべき所で `Option::Some` を返すことはないが、 `Option::Some` を返すべき所で `Option::None` を返すことがある。最初にチェックを行い、その後で unsafe な rename 関数を呼び出すことで解決できるはずである。
     pub fn rename(self: Expression, old_variable_name: &VariableName, new_variable_name: &VariableName) -> Option<Expression> {
-        match self {
-            Expression::Variable { name } => {
-                if *old_variable_name == name {
-                    Option::Some(Expression::Variable { name: new_variable_name.clone() })
-                } else {
-                    Option::Some(Expression::Variable { name: name.clone() })
-                }
+        let capture_set = self.collect_variable_captured_by(old_variable_name);
+
+        match capture_set {
+            CaptureSet::NoCapture => {
+                Option::Some(self.rename_unsafely(old_variable_name, new_variable_name))
             }
 
-            Expression::Application { function_part, argument_part } => {
-                let function_part_result = function_part.rename(old_variable_name, new_variable_name)?;
-                let argument_part_result = argument_part.rename(old_variable_name, new_variable_name)?;
-
-                Option::Some(Expression::Application { function_part: Box::new(function_part_result), argument_part: Box::new(argument_part_result) })
-            }
-
-            Expression::LambdaAbstraction { bound_variable_name, expression } => {
-                if *new_variable_name == bound_variable_name {
+            CaptureSet::Capture(set) => {
+                if set.contains(new_variable_name) {
                     Option::None
-                } else if *old_variable_name == bound_variable_name {
-                    Option::Some(Expression::LambdaAbstraction { bound_variable_name: bound_variable_name.clone(), expression: expression.clone() })
                 } else {
-                    let expression_result = expression.rename(old_variable_name, new_variable_name)?;
-
-                    Option::Some(Expression::LambdaAbstraction {
-                        bound_variable_name: bound_variable_name.clone(),
-                        expression: Box::new(expression_result),
-                    })
+                    Option::Some(self.rename_unsafely(old_variable_name, new_variable_name))
                 }
             }
         }
