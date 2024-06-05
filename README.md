@@ -165,11 +165,25 @@ Labda は様々な場面で使用できるプログラミング言語である�
 
 そのため、 Labda は外部とのやり取りをコントロールできる機能を持つ。
 
-### Labda は IO モナドで外部とのやり取りをコントロールするものとする。
+### Labda は作用子で外部とのやりとりをコントロールする。
 
-Haskell では、 IO モナドを使って純粋性を保ちながら、外部とのやり取りを可能としているのは有名な話である。 Idris や Lean や Agda なども同種の仕組みを持っている。
+純粋なラムダ計算は、全く作用を持たない。しかしながら、これに作用を加えることができる。それは、次のような変換を行うということである。
 
-外部とのやり取りをコントロールする……つまり副作用をコントロールする仕組みはモナドだけではない。コモナドおよびアローでも可能である。しかし、 $` x `$ は `pure` に対応し $` ( \lambda x \ldotp t ) s `$ は `(>>=)` に対応するなど、モナドはラムダ計算と同じ構造を持つため、モナドを採用するものとする。
+1. 変数を持ち上げることができる。 $` x : A `$ とする。 $` x : A `$ を変換すると $` [ x ] : F \cdot A `$ であり、これを進めると $` \mathrm{pure} \cdot x : F \cdot A `$ である。
+1. 適用を持ち上げることができる。 $` f : A \rightarrow B `$ とする。 $` x : A `$ とする。 $` f \cdot x : B `$ を変換すると $` [ f \cdot x ] : F \cdot B `$ であり、これを進めると $` ( \mathrm{bind} \cdot [ f ] ) \cdot [ x ] : F \cdot B `$ である。
+1. ラムダ抽象を持ち上げることができる。 $` x : A \vdash t : B `$ とする。 $` \lambda x \ldotp t : A \rightarrow B `$ を変換すると $` [ \lambda x \ldotp t ] : A \rightarrow F \cdot B `$ である。これを進めると、 $` \lambda x \ldotp [ t ] : A \rightarrow F \cdot B `$ である。
+
+ここで $` \mathrm{pure} `$ と $` \mathrm{bind} `$ という二種類の関数が出てきた。これらの型は、 $` x : A \vdash \mathrm{pure} \cdot x : F \cdot A `$ と $` f : A \rightarrow F \cdot B , x : F \cdot A \vdash ( \mathrm{bind} \cdot f ) \cdot x : F \cdot B `$ である。これらは、三種類の則を持つ。
+
+1. $` f : A \rightarrow F \cdot B , x : A \vdash ( \mathrm{bind} \cdot f ) \cdot ( \mathrm{pure} \cdot x ) \equiv f \cdot x : F \cdot B `$ である。
+1. $` x : F \cdot A \vdash ( \mathrm{bind} \cdot \mathrm{pure} ) \cdot x \equiv x : F \cdot A `$ である。
+1. $` g : B \rightarrow F \cdot C , f : A \rightarrow F \cdot B , x : F \cdot A \vdash ( \mathrm{bind} \cdot \lambda y \ldot ( \mathrm{bind} \cdot g ) \cdot ( f \cdot y ) ) \cdot x \equiv ( \mathrm{bind} \cdot g ) \cdot ( ( \mathrm{bind} \cdot f ) \cdot x ) : F \cdot C `$ である。
+
+このような性質を持つ $` F `$ を作用子と呼ぶことにする。実のところ、これは Haskell がモナドと呼ぶものである。このような作用子は、ラムダ計算と親和性が高いので、これを利用して外部とのやりとりをコントロールするものとする。
+
+他の選択肢として、 Haskell でいうコモナドとアローがある。アローはラムダ計算へ親和しないため、すぐに除外することができる。コモナドは、モナドと同様にラムダ計算と親和するが、ラムダ計算が直観主義論理に対応するがゆえに、ラムダ計算の関数において始域と終域は非対称であり、それがゆえにモナドと比べてコモナドの表現力は低いため、これも除外するものとする。そうすると、モナドだけが選択肢に残る。
+
+このため、 Labda は作用子で外部とのやりとりをコントロールする。
 
 ### Labda は非安全なプログラムを記述できるものとする。
 
