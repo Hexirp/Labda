@@ -177,7 +177,7 @@ Labda は様々な場面で使用できるプログラミング言語である�
 
 1. $` f : A \rightarrow F \cdot B , x : A \vdash ( \mathrm{bind} \cdot f ) \cdot ( \mathrm{pure} \cdot x ) \equiv f \cdot x : F \cdot B `$ である。
 1. $` x : F \cdot A \vdash ( \mathrm{bind} \cdot \mathrm{pure} ) \cdot x \equiv x : F \cdot A `$ である。
-1. $` g : B \rightarrow F \cdot C , f : A \rightarrow F \cdot B , x : F \cdot A \vdash ( \mathrm{bind} \cdot \lambda y \ldot ( \mathrm{bind} \cdot g ) \cdot ( f \cdot y ) ) \cdot x \equiv ( \mathrm{bind} \cdot g ) \cdot ( ( \mathrm{bind} \cdot f ) \cdot x ) : F \cdot C `$ である。
+1. $` g : B \rightarrow F \cdot C , f : A \rightarrow F \cdot B , x : F \cdot A \vdash ( \mathrm{bind} \cdot \lambda y \ldotp ( \mathrm{bind} \cdot g ) \cdot ( f \cdot y ) ) \cdot x \equiv ( \mathrm{bind} \cdot g ) \cdot ( ( \mathrm{bind} \cdot f ) \cdot x ) : F \cdot C `$ である。
 
 このような性質を持つ $` F `$ を作用子と呼ぶことにする。実のところ、これは Haskell がモナドと呼ぶものである。このような作用子は、ラムダ計算と親和性が高いので、これを利用して外部とのやりとりをコントロールするものとする。
 
