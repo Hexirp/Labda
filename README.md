@@ -253,6 +253,12 @@ Labda は、高度な数学を記述できる。ゲーデル数や強制法な�
 
 このため、 Labda は多段階計算の機能を持つ。
 
+### Labda は Homotopy Type Theory を取り入れる。
+
+Homotopy Type Theory は、商型を適切に取り扱うためには必要である。
+
+このため、 Labda は Homotopy Type Theory を取り入れる。
+
 ### Labda は三種類の等式型を持つものとする。
 
 等式型の定義は、様々なものがある。ライプニッツの定義もあれば、帰納的な定義もあるし、立方型理論 (cubical type theory) では関数に類似したものとして定義される。
