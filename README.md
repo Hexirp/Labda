@@ -259,6 +259,12 @@ Homotopy Type Theory は、商型を適切に取り扱うためには必要で�
 
 このため、 Labda は Homotopy Type Theory を取り入れる。
 
+### Labda は Quantitative Type Theory を取り入れる。
+
+Quantitative Type Theory は、依存型に対する適切な型消去を助け、線形論理と同等の原理でメモリの管理を可能にする。
+
+このため、 Labda は Quantitative Type Theory を取り入れる。
+
 ### Labda は三種類の等式型を持つものとする。
 
 等式型の定義は、様々なものがある。ライプニッツの定義もあれば、帰納的な定義もあるし、立方型理論 (cubical type theory) では関数に類似したものとして定義される。
