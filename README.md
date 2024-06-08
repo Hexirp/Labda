@@ -221,6 +221,14 @@ Labda は、高度なプログラムを記述できる。そのためには、�
 
 そのため、 Labda は帰納型を持つ。
 
+### Labda は余帰納型を持つ。
+
+Labda は、高度な数学を記述できる。 [Mike Shulman](https://proofassistants.stackexchange.com/users/98/mike-shulman) が 2022 年 2 月 9 日に投稿した文章（[リンク](https://proofassistants.stackexchange.com/questions/208/when-to-use-coinductive-types/210#210)）によると、 ∞-圏に関する概念を余帰納型で定義すると簡潔になる場合がある。
+
+Labda は、高度なプログラムを記述できる。そのためには、余帰納型が必要である。たとえば、ミーリマシンなどである。
+
+このため、 Labda は余帰納型を持つ。
+
 ### Labda は同値性の型を持つ。
 
 Labda は、高度な数学を記述できる。同値性の型は、高度な数学を記述するために必須である。
