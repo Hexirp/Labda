@@ -55,6 +55,10 @@ impl VariableName {
                 self == bound_variable_name || self.is_bound_variable_in(expression),
         }
     }
+
+    pub fn fresh_name(old_name: &VariableName, set: &HashSet<VariableName>) -> VariableName {
+        todo!()
+    }
 }
 
 impl Expression {
@@ -266,8 +270,51 @@ impl Expression {
         }
     }
 
-    pub fn substitute(left_part: &Expression, variable_name: &VariableName, right_part: &Expression) -> Expression {
-        todo!();
+    pub fn substitute(self: Expression, variable_name: &VariableName, right_expression: &Expression) -> Expression {
+        match self {
+            Expression::Variable { name } => {
+                if name == *variable_name {
+                    right_expression.clone()
+                } else {
+                    Expression::Variable { name }
+                }
+            }
+
+            Expression::Application { function_part, argument_part } => {
+                Expression::Application {
+                    function_part: Box::new(function_part.substitute(variable_name, right_expression)),
+                    argument_part: Box::new(argument_part.substitute(variable_name, right_expression)),
+                }
+            }
+
+            Expression::LambdaAbstraction { bound_variable_name, expression } => {
+                if bound_variable_name == *variable_name {
+                    Expression::LambdaAbstraction { bound_variable_name, expression }
+                } else {
+                    let set = {
+                        let mut set = HashSet::new();
+
+                        if let CaptureSet::Capture(capture_set) = expression.collect_variable_captured_by(&bound_variable_name) {
+                            set.extend(capture_set);
+                        }
+
+                        set.extend(right_expression.collect_free_variable());
+
+                        set
+                    };
+
+                    let fresh_name = VariableName::fresh_name(&bound_variable_name, &set);
+
+                    Expression::LambdaAbstraction {
+                        bound_variable_name: fresh_name.clone(),
+                        expression: Box::new(expression
+                            .rename(&bound_variable_name, &fresh_name)
+                            .unwrap()
+                            .substitute(&bound_variable_name, right_expression)),
+                    }
+                }
+            }
+        }
     }
 
     pub fn beta_reduce(function_part: &LambdaAbstractionExpression, argument_part: &Expression) -> Expression {
