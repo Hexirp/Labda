@@ -353,84 +353,100 @@ Edward Kmett さんが 2021 年 1 月 31 日に投稿した文章（[リンク](
 
 このため、ラカーセアーは複製と破棄を特殊な構文で行う。
 
-### ラカーセアーはグラフ簡約が可能である。
+### ラカーセアーはグラフ簡約を採用する。
 
-グラフの辺は向きを持つ。 `A` から `B` への矢印があるとき、 `A` の計算には `B` の計算が必要であることを示す。それぞれの辺は、必ず一つの辺と繋がる。
+ラムダ計算を簡約する方法には、様々な種類がある。ここで適用の項を簡約する時に関数の部分の項を先に簡約すると、それは名前呼びになる。これは、引数の部分の項をゼロ回使う場合に引数の部分の項を計算しないで済ませる。しかしながら、その代わりに、引数の部分の項を n 回使う場合、引数の部分の項を n 回計算することになる。そのため、引数の部分の項をメモ化することで、計算を減らすことができ、これを必要呼びという。必要呼びを採用すると、同じ変数が同じ項を指すようになるため、木構造ではなくグラフ構造となる。これをグラフ簡約という。
 
-`x` は次のようになる。
+次の表において、行の見出しは「関数の部分の項の中で引数の部分の項を何回使うか」を、列の見出しは評価戦略を、項目は「引数の部分の項を何回計算するか」を表す。
+
+|        | 値呼び | 名前呼び | 必要呼び |
+|-------:|-------:|---------:|---------:|
+|   0 回 |      1 |        0 |        0 |
+|   1 回 |      1 |        1 |        1 |
+|   2 回 |      1 |        2 |        1 |
+|   3 回 |      1 |        3 |        1 |
+
+ラカーセアーは実行順序をコントロールすることができる。プログラマーが遅延評価を選んだ場合でも効率的に実行できる必要がある。 Victor Taelin さんの [Interaction Calculus](https://github.com/VictorTaelin/Interaction-Calculus) は参考になる。
+
+このため、ラカーセアーはグラフ簡約を採用する。
+
+グラフの辺は向きを持つ。 `A` から `B` への矢印があるとき、 `A` は `B` を参照していることを示す。下向きの矢印の辺は項の組み立てを示し、上向きの矢印の辺は変数を表す。上向きの矢印の辺は、変数の名前をラベルとして持つ。
+
+変数の項のノードは、次のようになる。
 
 ```txt
-  | ^
-  | |
-  | | x
-  v |
-+-----+
-| var |
-+-----+
+digraph {
+  A [ label = "", shape = circle ]
+  B [ label = "", shape = circle ]
+  VAR [ shape = box ]
+
+  A -> VAR
+  B -> VAR [ dir = back, label = "x" ]
+}
 ```
 
-`t $ s` は次のようになる。
+適用の項のノードは、次のようになる。
 
 ```txt
-    |
-    |
-    |
-    v
-+-------+
-|  app  |
-+-------+
-  |   |
-  |   |
-  |   |
-  v   v
+digraph {
+  A [ label = "", shape = circle ]
+  B [ label = "", shape = circle ]
+  C [ label = "", shape = circle ]
+  APP [ shape = box ]
+
+  A -> APP
+  APP -> B
+  APP -> C
+}
 ```
 
-`lambda x then t` は次のようになる。
+ラムダ抽象の項のノードは、次のようになる。
 
 ```txt
-    |
-    |
-    |
-    v
-+-------+
-|  lam  |
-+-------+
-  ^   |
-  |   |
-x |   |
-  |   v
+digraph {
+  A [ label = "", shape = circle ]
+  B [ label = "", shape = circle ]
+  C [ label = "", shape = circle ]
+  LAM [ shape = box ]
+
+  A -> LAM
+  LAM -> B [ dir = back, label = "x" ]
+  LAM -> C
+}
 ```
 
-`dup y, z := x then t` は次のようになる。
+複製の項のノードは、次のようになる。
 
 ```txt
-   |   ^
- x |   |
-   |   |
-   v   |
-+---------+
-|   dup   |
-+---------+
-  ^   ^ |
-  |   | |
-y | z | |
-  |   | v
+digraph {
+  A [ label = "", shape = circle ]
+  B [ label = "", shape = circle ]
+  C [ label = "", shape = circle ]
+  D [ label = "", shape = circle ]
+  E [ label = "", shape = circle ]
+  COPY [ shape = box ]
+
+  A -> COPY
+  COPY -> B
+  COPY -> C [ dir = back, label = "x" ]
+  COPY -> D [ dir = back, label = "y" ]
+  COPY -> E
+}
 ```
 
-`del x then t` は次のようになる。
+削除の項のノードは、次のようになる。
 
 ```txt
-  ^ |
-  | |
-x | |
-  | v
-+-----+
-| del |
-+-----+
-   |
-   |
-   |
-   v
+digraph {
+  A [ label = "", shape = circle ]
+  B [ label = "", shape = circle ]
+  C [ label = "", shape = circle ]
+  DEL [ shape = box ]
+
+  A -> DEL
+  DEL -> B
+  DEL -> C
+}
 ```
 
 ## 開発方針
