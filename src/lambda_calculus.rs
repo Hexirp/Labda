@@ -56,12 +56,16 @@ impl VariableName {
         }
     }
 
+    fn foo<'a>(x: &'a String) -> &'a VariableName {
+        todo!()
+    }
+
     pub fn fresh_name(old_name: &VariableName, set: &HashSet<VariableName>) -> VariableName {
         let VariableName { string: old_string } = old_name;
 
         let mut new_string = old_string.clone();
 
-        while set.contains(&VariableName { string: new_string.clone() }) {
+        while set.contains(Self::foo(&new_string)) {
             new_string = new_string + "_";
         }
 
