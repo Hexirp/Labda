@@ -56,18 +56,24 @@ impl VariableName {
         }
     }
 
-    fn foo<'a>(x: &'a String) -> &'a VariableName {
-        todo!()
+    fn fresh_name_internal(set: &HashSet<VariableName>, string: String) -> String {
+        let name = VariableName { string };
+
+        let flag = set.contains(&name);
+
+        let string = name.string;
+
+        if flag {
+            Self::fresh_name_internal(set, string + "_")
+        } else {
+            string
+        }
     }
 
-    pub fn fresh_name(old_name: &VariableName, set: &HashSet<VariableName>) -> VariableName {
-        let VariableName { string: old_string } = old_name;
+    pub fn fresh_name(name: &VariableName, set: &HashSet<VariableName>) -> VariableName {
+        let string = name.string.clone();
 
-        let mut new_string = old_string.clone();
-
-        while set.contains(Self::foo(&new_string)) {
-            new_string = new_string + "_";
-        }
+        let new_string = Self::fresh_name_internal(set, string);
 
         VariableName { string: new_string }
     }
