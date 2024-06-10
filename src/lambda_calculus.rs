@@ -57,15 +57,13 @@ impl VariableName {
     }
 
     pub fn fresh_name(old_name: &VariableName, set: &HashSet<VariableName>) -> VariableName {
-        let VariableName { string: old_string } = old_name;
+        let mut new_name = old_name.clone();
 
-        let mut new_string = old_string.clone();
-
-        while set.contains(&VariableName { string: new_string.clone() }) {
-            new_string = new_string + "_";
+        while set.contains(&new_name) {
+            new_name.string = new_name.string + "_";
         }
 
-        VariableName { string: new_string }
+        new_name
     }
 }
 
