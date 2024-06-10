@@ -487,3 +487,145 @@ fn test_w_collect_variable_captured_by_z() {
         CaptureSet::Capture(vec![x.clone(), y.clone()].into_iter().collect()),
     );
 }
+
+#[test]
+fn test_v_rename_x_w() {
+    let x = VariableName { string: "a".to_string() };
+    let y = VariableName { string: "b".to_string() };
+    let z = VariableName { string: "c".to_string() };
+    let w = VariableName { string: "d".to_string() };
+    let v = Expression::Application {
+        function_part: Box::new(Expression::Variable { name: x.clone() }),
+        argument_part: Box::new(Expression::LambdaAbstraction {
+            bound_variable_name: y.clone(),
+            expression: Box::new(Expression::LambdaAbstraction {
+                bound_variable_name: x.clone(),
+                expression: Box::new(Expression::Application {
+                    function_part: Box::new(Expression::Variable { name: y.clone() }),
+                    argument_part: Box::new(Expression::Variable { name: z.clone() }),
+                }),
+            }),
+        }),
+    };
+    let u = Expression::Application {
+        function_part: Box::new(Expression::Variable { name: w.clone() }),
+        argument_part: Box::new(Expression::LambdaAbstraction {
+            bound_variable_name: y.clone(),
+            expression: Box::new(Expression::LambdaAbstraction {
+                bound_variable_name: x.clone(),
+                expression: Box::new(Expression::Application {
+                    function_part: Box::new(Expression::Variable { name: y.clone() }),
+                    argument_part: Box::new(Expression::Variable { name: z.clone() }),
+                }),
+            }),
+        }),
+    };
+
+    assert_eq!(
+        v.rename(&x, &w),
+        Option::Some(u),
+    )
+}
+
+#[test]
+fn test_v_rename_y_w() {
+    let x = VariableName { string: "a".to_string() };
+    let y = VariableName { string: "b".to_string() };
+    let z = VariableName { string: "c".to_string() };
+    let w = VariableName { string: "d".to_string() };
+    let v = Expression::Application {
+        function_part: Box::new(Expression::Variable { name: x.clone() }),
+        argument_part: Box::new(Expression::LambdaAbstraction {
+            bound_variable_name: y.clone(),
+            expression: Box::new(Expression::LambdaAbstraction {
+                bound_variable_name: x.clone(),
+                expression: Box::new(Expression::Application {
+                    function_part: Box::new(Expression::Variable { name: y.clone() }),
+                    argument_part: Box::new(Expression::Variable { name: z.clone() }),
+                }),
+            }),
+        }),
+    };
+    let u = Expression::Application {
+        function_part: Box::new(Expression::Variable { name: x.clone() }),
+        argument_part: Box::new(Expression::LambdaAbstraction {
+            bound_variable_name: y.clone(),
+            expression: Box::new(Expression::LambdaAbstraction {
+                bound_variable_name: x.clone(),
+                expression: Box::new(Expression::Application {
+                    function_part: Box::new(Expression::Variable { name: y.clone() }),
+                    argument_part: Box::new(Expression::Variable { name: z.clone() }),
+                }),
+            }),
+        }),
+    };
+
+    assert_eq!(
+        v.rename(&y, &w),
+        Option::Some(u),
+    )
+}
+
+#[test]
+fn test_v_rename_z_w() {
+    let x = VariableName { string: "a".to_string() };
+    let y = VariableName { string: "b".to_string() };
+    let z = VariableName { string: "c".to_string() };
+    let w = VariableName { string: "d".to_string() };
+    let v = Expression::Application {
+        function_part: Box::new(Expression::Variable { name: x.clone() }),
+        argument_part: Box::new(Expression::LambdaAbstraction {
+            bound_variable_name: y.clone(),
+            expression: Box::new(Expression::LambdaAbstraction {
+                bound_variable_name: x.clone(),
+                expression: Box::new(Expression::Application {
+                    function_part: Box::new(Expression::Variable { name: y.clone() }),
+                    argument_part: Box::new(Expression::Variable { name: z.clone() }),
+                }),
+            }),
+        }),
+    };
+    let u = Expression::Application {
+        function_part: Box::new(Expression::Variable { name: x.clone() }),
+        argument_part: Box::new(Expression::LambdaAbstraction {
+            bound_variable_name: y.clone(),
+            expression: Box::new(Expression::LambdaAbstraction {
+                bound_variable_name: x.clone(),
+                expression: Box::new(Expression::Application {
+                    function_part: Box::new(Expression::Variable { name: y.clone() }),
+                    argument_part: Box::new(Expression::Variable { name: w.clone() }),
+                }),
+            }),
+        }),
+    };
+
+    assert_eq!(
+        v.rename(&z, &w),
+        Option::Some(u),
+    )
+}
+
+#[test]
+fn test_v_rename_z_x() {
+    let x = VariableName { string: "a".to_string() };
+    let y = VariableName { string: "b".to_string() };
+    let z = VariableName { string: "c".to_string() };
+    let v = Expression::Application {
+        function_part: Box::new(Expression::Variable { name: x.clone() }),
+        argument_part: Box::new(Expression::LambdaAbstraction {
+            bound_variable_name: y.clone(),
+            expression: Box::new(Expression::LambdaAbstraction {
+                bound_variable_name: x.clone(),
+                expression: Box::new(Expression::Application {
+                    function_part: Box::new(Expression::Variable { name: y.clone() }),
+                    argument_part: Box::new(Expression::Variable { name: z.clone() }),
+                }),
+            }),
+        }),
+    };
+
+    assert_eq!(
+        v.rename(&z, &x),
+        Option::None,
+    )
+}
