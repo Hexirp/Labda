@@ -255,18 +255,10 @@ impl Expression {
     pub fn rename(self: Expression, old_variable_name: &VariableName, new_variable_name: &VariableName) -> Option<Expression> {
         let capture_set = self.collect_variable_captured_by(old_variable_name);
 
-        match capture_set {
-            CaptureSet::NoCapture => {
-                Option::Some(self.rename_unsafely(old_variable_name, new_variable_name))
-            }
-
-            CaptureSet::Capture(set) => {
-                if set.contains(new_variable_name) {
-                    Option::None
-                } else {
-                    Option::Some(self.rename_unsafely(old_variable_name, new_variable_name))
-                }
-            }
+        if capture_set.unwrap().contains(new_variable_name) {
+            Option::None
+        } else {
+            Option::Some(self.rename_unsafely(old_variable_name, new_variable_name))
         }
     }
 
@@ -294,10 +286,7 @@ impl Expression {
                     let set = {
                         let mut set = HashSet::new();
 
-                        if let CaptureSet::Capture(capture_set) = expression.collect_variable_captured_by(&bound_variable_name) {
-                            set.extend(capture_set);
-                        }
-
+                        set.extend(expression.collect_variable_captured_by(&bound_variable_name).unwrap());
                         set.extend(right_expression.collect_free_variable());
 
                         set
@@ -331,6 +320,20 @@ impl LambdaAbstractionExpression {
         let LambdaAbstractionExpression { bound_variable_name, expression } = self;
 
         expression.rename(&bound_variable_name, new_variable_name)
+    }
+}
+
+impl CaptureSet {
+    pub fn unwrap(self: CaptureSet) -> HashSet<VariableName> {
+        match self {
+            CaptureSet::NoCapture => {
+                HashSet::new()
+            }
+
+            CaptureSet::Capture(set) => {
+                set
+            }
+        }
     }
 }
 
