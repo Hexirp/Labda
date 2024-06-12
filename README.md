@@ -370,18 +370,18 @@ Edward Kmett さんが 2021 年 1 月 31 日に投稿した文章（[リンク](
 
 このため、ラカーセアーはグラフ簡約を採用する。
 
-グラフの辺は向きを持つ。 `A` から `B` への矢印があるとき、 `A` は `B` を参照していることを示す。下向きの矢印の辺は項の組み立てを示し、上向きの矢印の辺は変数を表す。上向きの矢印の辺は、変数の名前をラベルとして持つ。
+グラフの辺は向きを持つ。 `A` から `B` への矢印があるとき、 `A` は `B` を参照していることを示す。下向きの矢印の辺は項の組み立てを示し、上向きの矢印の辺は変数を表す。
 
 変数の項のノードは、次のようになる。これは `x` である。
 
 ```txt
 digraph {
   A [ label = "", shape = oval ]
-  B [ label = "", shape = circle ]
+  B [ label = "x", shape = circle ]
   VAR [ shape = box ]
 
   A -> VAR
-  B -> VAR [ dir = back, label = "x" ]
+  B -> VAR [ dir = back ]
 }
 ```
 
@@ -405,12 +405,12 @@ digraph {
 ```txt
 digraph {
   A [ label = "", shape = oval ]
-  B [ label = "", shape = circle ]
+  B [ label = "x", shape = circle ]
   C [ label = "t", shape = oval ]
   LAM [ shape = box ]
 
   A -> LAM
-  LAM -> B [ dir = back, label = "x" ]
+  LAM -> B [ dir = back ]
   LAM -> C
 }
 ```
@@ -421,15 +421,15 @@ digraph {
 digraph {
   A [ label = "", shape = oval ]
   B [ label = "t", shape = oval ]
-  C [ label = "", shape = circle ]
-  D [ label = "", shape = circle ]
+  C [ label = "x", shape = circle ]
+  D [ label = "y", shape = circle ]
   E [ label = "s", shape = oval ]
   COPY [ shape = box ]
 
   A -> COPY
   COPY -> B
-  COPY -> C [ dir = back, label = "x" ]
-  COPY -> D [ dir = back, label = "y" ]
+  COPY -> C [ dir = back ]
+  COPY -> D [ dir = back ]
   COPY -> E
 }
 ```
