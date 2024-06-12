@@ -349,7 +349,7 @@ Edward Kmett さんが 2021 年 1 月 31 日に投稿した文章（[リンク](
 
 ラカーセアーは線形ラムダ計算である。しかしながら、単なる線形ラムダ計算では、分岐とループを表現することができない。複製と破棄が必要である。
 
-最初の動機を振り返ってみると、ベータ簡約で複製と破棄が暗黙的に起こることが原因であった。ならば、複製と破棄を明示的に行う構文を導入すればよい。それは、たとえば `copy t to x and y then s` や `delete t then s` などのような構文である。これを使うと、最小の簡約が停止しない式は `( lambda x => copy x to y and z then y z ) ( lambda x => copy x to y and z then y z )` となる。
+最初の動機を振り返ってみると、ベータ簡約で複製と破棄が暗黙的に起こることが原因であった。ならば、複製と破棄を明示的に行う構文を導入すればよい。それは、たとえば `copy t to x and y then s` や `delete t then s` などのような構文である。これを使うと、最小の簡約が停止しない式は `( lambda x to copy x to y and z then y z ) ( lambda x to copy x to y and z then y z )` となる。
 
 このため、ラカーセアーは複製と破棄を特殊な構文で行う。
 
