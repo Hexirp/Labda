@@ -372,11 +372,11 @@ Edward Kmett さんが 2021 年 1 月 31 日に投稿した文章（[リンク](
 
 グラフの辺は向きを持つ。 `A` から `B` への矢印があるとき、 `A` は `B` を参照していることを示す。下向きの矢印の辺は項の組み立てを示し、上向きの矢印の辺は変数を表す。上向きの矢印の辺は、変数の名前をラベルとして持つ。
 
-変数の項のノードは、次のようになる。
+変数の項のノードは、次のようになる。これは `x` である。
 
 ```txt
 digraph {
-  A [ label = "", shape = circle ]
+  A [ label = "", shape = oval ]
   B [ label = "", shape = circle ]
   VAR [ shape = box ]
 
@@ -385,13 +385,13 @@ digraph {
 }
 ```
 
-適用の項のノードは、次のようになる。
+適用の項のノードは、次のようになる。これは `t s` である。
 
 ```txt
 digraph {
-  A [ label = "", shape = circle ]
-  B [ label = "", shape = circle ]
-  C [ label = "", shape = circle ]
+  A [ label = "", shape = oval ]
+  B [ label = "t", shape = oval ]
+  C [ label = "s", shape = oval ]
   APP [ shape = box ]
 
   A -> APP
@@ -400,13 +400,13 @@ digraph {
 }
 ```
 
-ラムダ抽象の項のノードは、次のようになる。
+ラムダ抽象の項のノードは、次のようになる。これは `lambda x to t` である。
 
 ```txt
 digraph {
-  A [ label = "", shape = circle ]
+  A [ label = "", shape = oval ]
   B [ label = "", shape = circle ]
-  C [ label = "", shape = circle ]
+  C [ label = "t", shape = oval ]
   LAM [ shape = box ]
 
   A -> LAM
@@ -415,15 +415,15 @@ digraph {
 }
 ```
 
-複製の項のノードは、次のようになる。
+複製の項のノードは、次のようになる。これは `copy t to x and y then s` である。
 
 ```txt
 digraph {
-  A [ label = "", shape = circle ]
-  B [ label = "", shape = circle ]
+  A [ label = "", shape = oval ]
+  B [ label = "t", shape = oval ]
   C [ label = "", shape = circle ]
   D [ label = "", shape = circle ]
-  E [ label = "", shape = circle ]
+  E [ label = "s", shape = oval ]
   COPY [ shape = box ]
 
   A -> COPY
@@ -434,13 +434,13 @@ digraph {
 }
 ```
 
-削除の項のノードは、次のようになる。
+削除の項のノードは、次のようになる。これは `delete t then s` である。
 
 ```txt
 digraph {
-  A [ label = "", shape = circle ]
-  B [ label = "", shape = circle ]
-  C [ label = "", shape = circle ]
+  A [ label = "", shape = oval ]
+  B [ label = "t", shape = oval ]
+  C [ label = "s", shape = oval ]
   DEL [ shape = box ]
 
   A -> DEL
