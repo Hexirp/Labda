@@ -449,6 +449,59 @@ digraph {
 }
 ```
 
+`( lambda x to copy x to y and z then y z ) ( lambda x to copy x to y and z then y z )` は次のようになる。
+
+```txt
+digraph {
+  A [ label = "ROOT", shape = box ]
+  B [ label = "APP", shape = box ]
+  C [ label = "LAM", shape = box ]
+  D [ label = "x", shape = circle ]
+  E [ label = "COPY", shape = box ]
+  F [ label = "VAR", shape = box ]
+  G [ label = "y", shape = circle ]
+  H [ label = "z", shape = circle ]
+  I [ label = "APP", shape = box ]
+  J [ label = "VAR", shape = box ]
+  K [ label = "VAR", shape = box ]
+  L [ label = "LAM", shape = box ]
+  M [ label = "x", shape = circle ]
+  N [ label = "COPY", shape = box ]
+  O [ label = "VAR", shape = box ]
+  P [ label = "y", shape = circle ]
+  Q [ label = "z", shape = circle ]
+  R [ label = "APP", shape = box ]
+  S [ label = "VAR", shape = box ]
+  T [ label = "VAR", shape = box ]
+
+  A -> B
+  B -> C
+  C -> D [ dir = back ]
+  C -> E
+  D -> F [ dir = back ]
+  E -> F
+  E -> G [ dir = back ]
+  E -> H [ dir = back ]
+  E -> I
+  G -> J [ dir = back ]
+  I -> J
+  H -> K [ dir = back ]
+  I -> K
+  B -> L
+  L -> M [ dir = back ]
+  L -> N
+  M -> O [ dir = back ]
+  N -> O
+  N -> P [ dir = back ]
+  N -> Q [ dir = back ]
+  N -> R
+  P -> S [ dir = back ]
+  R -> S
+  Q -> T [ dir = back ]
+  R -> T
+}
+```
+
 ## 開発方針
 
 ### 全体の枠組みを作ってから細部を広げていく。
