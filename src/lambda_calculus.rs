@@ -670,14 +670,10 @@ impl Expression {
                 if &bound_variable_name == variable_name {
                     Expression::LambdaAbstraction { bound_variable_name, expression }
                 } else {
-                    let set = {
-                        let mut set = HashSet::new();
+                    let mut set = HashSet::new();
 
-                        set.extend(expression.collect_variable_captured_by(&bound_variable_name).unwrap());
-                        set.extend(right_expression.collect_free_variable());
-
-                        set
-                    };
+                    set.extend(expression.collect_variable_captured_by(&bound_variable_name).unwrap());
+                    set.extend(right_expression.collect_free_variable());
 
                     let fresh_name = VariableName::fresh_name(&bound_variable_name, &set);
 
