@@ -637,8 +637,8 @@ impl LambdaAbstractionExpression {
 }
 
 impl VariableName {
-    pub fn fresh_name(old_name: &VariableName, set: &HashSet<VariableName>) -> VariableName {
-        let mut new_name = old_name.clone();
+    pub fn fresh(self: &VariableName, set: &HashSet<VariableName>) -> VariableName {
+        let mut new_name = self.clone();
 
         while set.contains(&new_name) {
             new_name.string = new_name.string + "_";
@@ -675,7 +675,7 @@ impl Expression {
                     set.extend(expression.collect_variable_captured_by(&bound_variable_name).unwrap());
                     set.extend(right_expression.collect_free_variable());
 
-                    let fresh_name = VariableName::fresh_name(&bound_variable_name, &set);
+                    let fresh_name = bound_variable_name.fresh(&set);
 
                     let new_expression = expression
                         .rename(&bound_variable_name, &fresh_name)
