@@ -296,7 +296,7 @@ impl Expression {
     pub fn collect_variable_captured_by(&self, variable_name: &VariableName) -> CaptureSet {
         match self {
             Expression::Variable { name } => {
-                if variable_name == name {
+                if name == variable_name {
                     let set = HashSet::new();
 
                     CaptureSet::Capture(set)
@@ -342,7 +342,7 @@ impl Expression {
             }
 
             Expression::LambdaAbstraction { bound_variable_name, expression } => {
-                if variable_name == bound_variable_name {
+                if bound_variable_name == variable_name {
                     CaptureSet::NoCapture
                 } else {
                     let expression_result = expression.collect_variable_captured_by(variable_name);
@@ -446,7 +446,7 @@ impl Expression {
     pub fn rename_unsafely(self: Expression, old_variable_name: &VariableName, new_variable_name: &VariableName) -> Expression {
         match self {
             Expression::Variable { name } => {
-                if *old_variable_name == name {
+                if &name == old_variable_name {
                     Expression::Variable { name: new_variable_name.clone() }
                 } else {
                     Expression::Variable { name }
@@ -461,7 +461,7 @@ impl Expression {
             }
 
             Expression::LambdaAbstraction { bound_variable_name, expression } => {
-                if *old_variable_name == bound_variable_name {
+                if &bound_variable_name == old_variable_name {
                     Expression::LambdaAbstraction { bound_variable_name, expression }
                 } else {
                     let expression_result = expression.rename_unsafely(old_variable_name, new_variable_name);
@@ -652,7 +652,7 @@ impl Expression {
     pub fn substitute(self: Expression, variable_name: &VariableName, right_expression: &Expression) -> Expression {
         match self {
             Expression::Variable { name } => {
-                if name == *variable_name {
+                if &name == variable_name {
                     right_expression.clone()
                 } else {
                     Expression::Variable { name }
@@ -667,7 +667,7 @@ impl Expression {
             }
 
             Expression::LambdaAbstraction { bound_variable_name, expression } => {
-                if bound_variable_name == *variable_name {
+                if &bound_variable_name == variable_name {
                     Expression::LambdaAbstraction { bound_variable_name, expression }
                 } else {
                     let set = {
