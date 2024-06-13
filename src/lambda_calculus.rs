@@ -690,9 +690,11 @@ impl Expression {
             }
         }
     }
+}
 
-    pub fn beta_reduce(function_part: LambdaAbstractionExpression, argument_part: Expression) -> Expression {
-        let LambdaAbstractionExpression { bound_variable_name, expression } = function_part;
+impl LambdaAbstractionExpression {
+    pub fn beta_reduce(self: LambdaAbstractionExpression, argument_part: Expression) -> Expression {
+        let LambdaAbstractionExpression { bound_variable_name, expression } = self;
 
         expression.substitute(&bound_variable_name, argument_part)
     }
