@@ -159,7 +159,7 @@ fn test_w_collect_variable() {
 
     assert_eq!(
         w.collect_variable(),
-        vec![x.clone(), y.clone(), z.clone()].into_iter().collect(),
+        HashSet::from([x.clone(), y.clone(), z.clone()]),
     );
 }
 
@@ -216,7 +216,7 @@ fn test_w_collect_free_variable() {
 
     assert_eq!(
         w.collect_free_variable(),
-        vec![x.clone(), z.clone()].into_iter().collect(),
+        HashSet::from([x.clone(), z.clone()]),
     );
 }
 
@@ -271,7 +271,7 @@ fn test_w_collect_bound_variable() {
 
     assert_eq!(
         w.collect_bound_variable(),
-        vec![x.clone(), y.clone()].into_iter().collect(),
+        HashSet::from([x.clone(), y.clone()]),
     );
 }
 
@@ -388,7 +388,7 @@ fn test_w_collect_variable_captured_by_x() {
 
     assert_eq!(
         w.collect_variable_captured_by(&x),
-        CaptureSet::Capture(vec![].into_iter().collect()),
+        CaptureSet::Capture(HashSet::from([])),
     );
 }
 
@@ -438,7 +438,7 @@ fn test_w_collect_variable_captured_by_z() {
 
     assert_eq!(
         w.collect_variable_captured_by(&z),
-        CaptureSet::Capture(vec![x.clone(), y.clone()].into_iter().collect()),
+        CaptureSet::Capture(HashSet::from([x.clone(), y.clone()])),
     );
 }
 
