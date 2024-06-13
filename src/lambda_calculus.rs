@@ -649,11 +649,11 @@ impl VariableName {
 }
 
 impl Expression {
-    pub fn substitute(self: Expression, variable_name: &VariableName, right_expression: &Expression) -> Expression {
+    pub fn substitute(self: Expression, variable_name: &VariableName, right_expression: Expression) -> Expression {
         match self {
             Expression::Variable { name } => {
                 if &name == variable_name {
-                    right_expression.clone()
+                    right_expression
                 } else {
                     Expression::Variable { name }
                 }
@@ -661,8 +661,8 @@ impl Expression {
 
             Expression::Application { function_part, argument_part } => {
                 Expression::Application {
-                    function_part: Box::new(function_part.substitute(variable_name, right_expression)),
-                    argument_part: Box::new(argument_part.substitute(variable_name, right_expression)),
+                    function_part: Box::new(function_part.substitute(variable_name, right_expression.clone())),
+                    argument_part: Box::new(argument_part.substitute(variable_name, right_expression.clone())),
                 }
             }
 
@@ -691,7 +691,7 @@ impl Expression {
         }
     }
 
-    pub fn beta_reduce(function_part: LambdaAbstractionExpression, argument_part: &Expression) -> Expression {
+    pub fn beta_reduce(function_part: LambdaAbstractionExpression, argument_part: Expression) -> Expression {
         match function_part {
             LambdaAbstractionExpression { bound_variable_name, expression } => {
                 expression.substitute(&bound_variable_name, argument_part)
