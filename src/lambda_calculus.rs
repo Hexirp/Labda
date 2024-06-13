@@ -677,12 +677,14 @@ impl Expression {
 
                     let fresh_name = VariableName::fresh_name(&bound_variable_name, &set);
 
+                    let new_expression = expression
+                        .rename(&bound_variable_name, &fresh_name)
+                        .unwrap()
+                        .substitute(&bound_variable_name, right_expression);
+
                     Expression::LambdaAbstraction {
-                        bound_variable_name: fresh_name.clone(),
-                        expression: Box::new(expression
-                            .rename(&bound_variable_name, &fresh_name)
-                            .unwrap()
-                            .substitute(&bound_variable_name, right_expression)),
+                        bound_variable_name: fresh_name,
+                        expression: Box::new(new_expression),
                     }
                 }
             }
