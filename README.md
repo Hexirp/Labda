@@ -261,6 +261,12 @@ Homotopy Type Theory は、商型を適切に取り扱うためには必要で�
 
 このため、 Labda は Homotopy Type Theory を取り入れる。
 
+### Labda は Cubical Type Theory を取り入れる。
+
+高階帰納型を計算できる形で取り入れるためには、 Cubical Type Theory が必要である。
+
+このため、 Labda は Cubical Type Theory を取り入れる。
+
 ### Labda は Quantitative Type Theory を取り入れる。
 
 Quantitative Type Theory は、依存型に対する適切な型消去を助け、線形論理と同等の原理でメモリの管理を可能にする。
