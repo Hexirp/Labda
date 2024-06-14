@@ -699,3 +699,14 @@ impl LambdaAbstractionExpression {
         expression.substitute(&bound_variable_name, argument_part)
     }
 }
+
+pub enum EvaluationResult {
+    Complete { result: Expression, time: u64 },
+    Timeout { latest_expression: Expression },
+}
+
+impl Expression {
+    pub fn evaluate(self: Expression, max_time: u64) -> EvaluationResult {
+        todo!()
+    }
+}
