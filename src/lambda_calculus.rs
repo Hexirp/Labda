@@ -804,13 +804,46 @@ impl Expression {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub struct Time { number: u64 }
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub enum TimeLimit {
+    Finite { time: Time },
+    Infinite,
+}
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub enum EvaluationResult {
-    Complete { result: Expression, time: u64 },
-    Timeout { latest_expression: Expression },
+    Completed { expression: Expression, time: Time },
+    Timeout { expression: Expression },
 }
 
 impl Expression {
-    pub fn evaluate(self: Expression, max_time: u64) -> EvaluationResult {
-        todo!()
+    pub fn evaluate(self: Expression, time_limit: TimeLimit) -> EvaluationResult {
+        let mut expression = self;
+        let mut time = Time { number: 0 };
+        let mut yet = true;
+
+        while (yet || TimeLimit::Finite { time } < time_limit) {
+            match expression.reduce() {
+                ReductionResult::NormalForm { expression: result } => {
+                    expression = result;
+                }
+
+                ReductionResult::Reduced { expression: result } => {
+                    expression = result;
+                    yet = false;
+                }
+            }
+
+            time.number = time.number + 1;
+        }
+
+        if yet {
+            EvaluationResult::Timeout { expression }
+        } else {
+            EvaluationResult::Completed { expression, time }
+        }
     }
 }
