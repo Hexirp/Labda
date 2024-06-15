@@ -677,8 +677,10 @@ impl Expression {
 
                     let fresh_name = bound_variable_name.fresh(&set);
 
-                    let new_expression = expression
-                        .rename(&bound_variable_name, &fresh_name)
+                    let old_expression = LambdaAbstractionExpression { bound_variable_name, expression: *expression };
+
+                    let new_expression = old_expression
+                        .alpha_convert(&fresh_name)
                         .unwrap()
                         .substitute(&fresh_name, right_expression);
 
