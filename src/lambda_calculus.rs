@@ -702,43 +702,70 @@ impl LambdaAbstractionExpression {
     }
 }
 
+enum ReductionResult { NormalForm { expression: Expression }, Reduced { expression: Expression } }
+
 impl Expression {
-    pub fn reduce(self: Expression) -> Option<Expression> {
+    pub fn reduce(self: Expression) -> ReductionResult {
         match self {
             Expression::Variable { name } => {
-                Option::None
+                ReductionResult::NormalForm { expression: Expression::Variable { name } }
             }
 
             Expression::Application { function_part, argument_part } => {
                 match *function_part {
                     Expression::Variable { name } => {
-                        Option::None
-                    }
-
-                    Expression::Application {
-                        function_part: function_function_part,
-                        argument_part: function_argument_part,
-                    } => {
-                        let function_part = Expression::Application {
-                            function_part: function_function_part,
-                            argument_part: function_argument_part,
-                        };
-
-                        match function_part.reduce() {
-                            Option::None => {
-                                match argument_part.reduce() {
-                                    Option::None => {
-                                        Option::None
-                                    }
-
-                                    Option::Some(argument_part_result) => {
-                                        Option::Some(Expression::Application { function_part: todo!(), argument_part: Box::new(argument_part_result) })
+                        match argument_part.reduce() {
+                            ReductionResult::NormalForm { expression } => {
+                                ReductionResult::NormalForm {
+                                    expression: Expression::Application {
+                                        function_part: Box::new(Expression::Variable { name }),
+                                        argument_part: Box::new(expression),
                                     }
                                 }
                             }
 
-                            Option::Some(function_part_result) => {
-                                Option::Some(Expression::Application { function_part: Box::new(function_part_result), argument_part })
+                            ReductionResult::Reduced { expression } => {
+                                ReductionResult::Reduced {
+                                    expression: Expression::Application {
+                                        function_part: Box::new(Expression::Variable { name }),
+                                        argument_part: Box::new(expression),
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Expression::Application { function_part, argument_part } => {
+                        match function_part.reduce() {
+                            ReductionResult::NormalForm { expression: function_part_result } => {
+                                match argument_part.reduce() {
+                                    ReductionResult::NormalForm { expression: argument_part_result } => {
+                                        ReductionResult::NormalForm {
+                                            expression: Expression::Application {
+                                                function_part: Box::new(function_part_result),
+                                                argument_part: Box::new(argument_part_result),
+                                            }
+                                        }
+                                    }
+
+                                    ReductionResult::Reduced { expression: argument_part_result } => {
+                                        ReductionResult::Reduced {
+                                            expression: Expression::Application {
+                                                function_part: Box::new(function_part_result),
+                                                argument_part: Box::new(argument_part_result),
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            ReductionResult::Reduced { expression: function_part_result } => {
+                                ReductionResult::Reduced {
+                                    expression: Expression::Application {
+                                        function_part: Box::new(function_part_result),
+                                        argument_part,
+                                    }
+                                }
                             }
                         }
                     }
@@ -746,19 +773,29 @@ impl Expression {
                     Expression::LambdaAbstraction { bound_variable_name, expression } => {
                         let function_part = LambdaAbstractionExpression { bound_variable_name, expression: *expression };
 
-                        Some(function_part.beta_reduce(*argument_part))
+                        ReductionResult::Reduced { expression: function_part.beta_reduce(*argument_part) }
                     }
                 }
             }
 
             Expression::LambdaAbstraction { bound_variable_name, expression } => {
                 match expression.reduce() {
-                    Option::None => {
-                        Option::None
+                    ReductionResult::NormalForm { expression } => {
+                        ReductionResult::NormalForm {
+                            expression: Expression::LambdaAbstraction {
+                                bound_variable_name,
+                                expression: Box::new(expression),
+                            }
+                        }
                     }
 
-                    Option::Some(expression_result) => {
-                        Option::Some(Expression::LambdaAbstraction { bound_variable_name, expression: Box::new(expression_result) })
+                    ReductionResult::Reduced { expression } => {
+                        ReductionResult::Reduced {
+                            expression: Expression::LambdaAbstraction {
+                                bound_variable_name,
+                                expression: Box::new(expression),
+                            }
+                        }
                     }
                 }
             }
