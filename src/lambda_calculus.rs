@@ -702,13 +702,148 @@ impl LambdaAbstractionExpression {
     }
 }
 
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub enum ReductionResult { NormalForm { expression: Expression }, Reduced { expression: Expression } }
+
+impl Expression {
+    pub fn reduce(self: Expression) -> ReductionResult {
+        match self {
+            Expression::Variable { name } => {
+                ReductionResult::NormalForm { expression: Expression::Variable { name } }
+            }
+
+            Expression::Application { function_part, argument_part } => {
+                match *function_part {
+                    Expression::Variable { name } => {
+                        match argument_part.reduce() {
+                            ReductionResult::NormalForm { expression } => {
+                                ReductionResult::NormalForm {
+                                    expression: Expression::Application {
+                                        function_part: Box::new(Expression::Variable { name }),
+                                        argument_part: Box::new(expression),
+                                    }
+                                }
+                            }
+
+                            ReductionResult::Reduced { expression } => {
+                                ReductionResult::Reduced {
+                                    expression: Expression::Application {
+                                        function_part: Box::new(Expression::Variable { name }),
+                                        argument_part: Box::new(expression),
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Expression::Application { function_part, argument_part } => {
+                        match function_part.reduce() {
+                            ReductionResult::NormalForm { expression: function_part_result } => {
+                                match argument_part.reduce() {
+                                    ReductionResult::NormalForm { expression: argument_part_result } => {
+                                        ReductionResult::NormalForm {
+                                            expression: Expression::Application {
+                                                function_part: Box::new(function_part_result),
+                                                argument_part: Box::new(argument_part_result),
+                                            }
+                                        }
+                                    }
+
+                                    ReductionResult::Reduced { expression: argument_part_result } => {
+                                        ReductionResult::Reduced {
+                                            expression: Expression::Application {
+                                                function_part: Box::new(function_part_result),
+                                                argument_part: Box::new(argument_part_result),
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            ReductionResult::Reduced { expression: function_part_result } => {
+                                ReductionResult::Reduced {
+                                    expression: Expression::Application {
+                                        function_part: Box::new(function_part_result),
+                                        argument_part,
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Expression::LambdaAbstraction { bound_variable_name, expression } => {
+                        let function_part = LambdaAbstractionExpression { bound_variable_name, expression: *expression };
+
+                        ReductionResult::Reduced { expression: function_part.beta_reduce(*argument_part) }
+                    }
+                }
+            }
+
+            Expression::LambdaAbstraction { bound_variable_name, expression } => {
+                match expression.reduce() {
+                    ReductionResult::NormalForm { expression } => {
+                        ReductionResult::NormalForm {
+                            expression: Expression::LambdaAbstraction {
+                                bound_variable_name,
+                                expression: Box::new(expression),
+                            }
+                        }
+                    }
+
+                    ReductionResult::Reduced { expression } => {
+                        ReductionResult::Reduced {
+                            expression: Expression::LambdaAbstraction {
+                                bound_variable_name,
+                                expression: Box::new(expression),
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub struct Time { number: u64 }
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub enum TimeLimit {
+    Finite { time: Time },
+    Infinite,
+}
+
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub enum EvaluationResult {
-    Complete { result: Expression, time: u64 },
-    Timeout { latest_expression: Expression },
+    Completed { expression: Expression, time: Time },
+    Timeout { expression: Expression },
 }
 
 impl Expression {
-    pub fn evaluate(self: Expression, max_time: u64) -> EvaluationResult {
-        todo!()
+    pub fn evaluate(self: Expression, time_limit: TimeLimit) -> EvaluationResult {
+        let mut expression = self;
+        let mut time = Time { number: 0 };
+        let mut yet = true;
+
+        while (yet || TimeLimit::Finite { time } < time_limit) {
+            match expression.reduce() {
+                ReductionResult::NormalForm { expression: result } => {
+                    expression = result;
+                }
+
+                ReductionResult::Reduced { expression: result } => {
+                    expression = result;
+                    yet = false;
+                }
+            }
+
+            time.number = time.number + 1;
+        }
+
+        if yet {
+            EvaluationResult::Timeout { expression }
+        } else {
+            EvaluationResult::Completed { expression, time }
+        }
     }
 }
