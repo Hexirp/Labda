@@ -680,7 +680,7 @@ impl Expression {
                     let new_expression = expression
                         .rename(&bound_variable_name, &fresh_name)
                         .unwrap()
-                        .substitute(&bound_variable_name, right_expression);
+                        .substitute(&fresh_name, right_expression);
 
                     Expression::LambdaAbstraction {
                         bound_variable_name: fresh_name,
