@@ -702,7 +702,8 @@ impl LambdaAbstractionExpression {
     }
 }
 
-enum ReductionResult { NormalForm { expression: Expression }, Reduced { expression: Expression } }
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+pub enum ReductionResult { NormalForm { expression: Expression }, Reduced { expression: Expression } }
 
 impl Expression {
     pub fn reduce(self: Expression) -> ReductionResult {
