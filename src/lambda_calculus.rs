@@ -702,6 +702,70 @@ impl LambdaAbstractionExpression {
     }
 }
 
+impl Expression {
+    pub fn reduce(self: Expression) -> Option<Expression> {
+        match self {
+            Expression::Variable { name } => {
+                Option::None
+            }
+
+            Expression::Application { function_part, argument_part } => {
+                match *function_part {
+                    Expression::Variable { name } => {
+                        Option::None
+                    }
+
+                    Expression::Application {
+                        function_part: function_function_part,
+                        argument_part: function_argument_part,
+                    } => {
+                        let function_part = Expression::Application {
+                            function_part: function_function_part,
+                            argument_part: function_argument_part,
+                        };
+
+                        match function_part.reduce() {
+                            Option::None => {
+                                match argument_part.reduce() {
+                                    Option::None => {
+                                        Option::None
+                                    }
+
+                                    Option::Some(argument_part_result) => {
+                                        Option::Some(Expression::Application { function_part: todo!(), argument_part: Box::new(argument_part_result) })
+                                    }
+                                }
+                            }
+
+                            Option::Some(function_part_result) => {
+                                Option::Some(Expression::Application { function_part: Box::new(function_part_result), argument_part })
+                            }
+                        }
+                    }
+
+                    Expression::LambdaAbstraction { bound_variable_name, expression } => {
+                        let function_part = LambdaAbstractionExpression { bound_variable_name, expression: *expression };
+
+                        Some(function_part.beta_reduce(*argument_part))
+                    }
+                }
+            }
+
+            Expression::LambdaAbstraction { bound_variable_name, expression } => {
+                match expression.reduce() {
+                    Option::None => {
+                        Option::None
+                    }
+
+                    Option::Some(expression_result) => {
+                        Option::Some(Expression::LambdaAbstraction { bound_variable_name, expression: Box::new(expression_result) })
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub enum EvaluationResult {
     Complete { result: Expression, time: u64 },
     Timeout { latest_expression: Expression },
