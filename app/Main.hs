@@ -1,6 +1,6 @@
-module Main (main) where
+module Main ( main ) where
 
-import Lib
+import Labda.UntypedLambdaCalculus
 
 main :: IO ()
-main = someFunc
+main = putStrLn ( unparse ( Abstraction "x" ( Variable "x" 0 ) ) )

@@ -27,7 +27,7 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Labda.UntypedLambdaCalculus
   other-modules:
       Paths_labda
   hs-source-dirs:
