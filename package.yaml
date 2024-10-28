@@ -1,0 +1,59 @@
+name:                labda
+version:             0.1.0.0
+github:              Hexirp/Labda
+license:             Apache-2.0
+author:              Hexirp
+maintainer:          https://github.com/Hexirp/Labda/issues
+copyright:           (C) 2023-2024 Hexirp
+
+extra-doc-files:
+- README.md
+- CHANGELOG.md
+
+# Metadata used when publishing your package
+synopsis:            a programming language and theorem proving assistant
+category:            Compilers/Interpreters
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/Hexirp/Labda#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wpartial-fields
+- -Wredundant-constraints
+
+library:
+  source-dirs: src
+
+executables:
+  labda-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - labda >= 0.1 && < 1
+
+tests:
+  labda-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - labda >= 0.1 && < 1
