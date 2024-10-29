@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      Labda.Parser
       Labda.UntypedLambdaCalculus
   other-modules:
       Paths_labda

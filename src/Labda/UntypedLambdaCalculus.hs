@@ -1,4 +1,6 @@
-module Labda.UntypedLambdaCalculus (Term (..), parse, unparse, format) where
+module Labda.UntypedLambdaCalculus where
+
+import Labda.Parser
 
 data Term = Variable String Word | Abstraction String Term | Application Term Term
 
