@@ -1,13 +1,13 @@
-module Labda.UntypedLambdaCalculus (parse, unparse, format) where
+module Labda.UntypedLambdaCalculus (Term (..), parse, unparse, format) where
 
-data SyntaxTree = Variable String Word | Abstraction String SyntaxTree | Application SyntaxTree SyntaxTree
+data Term = Variable String Word | Abstraction String Term | Application Term Term
 
-parse :: String -> SyntaxTree
+parse :: String -> Term
 parse t = if t == "lambda x => lambda y => x#1"
   then Abstraction "x" (Abstraction "y" (Variable "x" 1))
   else Abstraction "x" (Variable "x" 0)
 
-unparse :: SyntaxTree -> String
+unparse :: Term -> String
 unparse t = "lambda x => lambda y => x#1"
 
 format :: String -> String
