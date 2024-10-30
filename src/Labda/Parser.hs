@@ -1,10 +1,26 @@
 module Labda.Parser where
 
-newtype Parser s a = Parser { runParser :: s -> (a, s) }
+data ParserResult w s a = Failure w s | Success w s a
 
-sequence :: (a -> Either c (b -> c)) -> Parser s a -> Parser s b -> Parser s c
-sequence f x y = Parser $ \s -> case runParser x s of
-  (a, s') -> case f a of
-    Left c -> (c, s')
-    Right g -> case runParser y s' of
-      (b, s'') -> (g b, s'')
+newtype Parser w s a = Parser { runParser :: s -> ParserResult w s a }
+
+instance Functor (Parser w s) where
+  fmap f x0 = Parser $ \s0 -> case runParser x0 s0 of
+    Failure w s1 -> Failure w s1
+    Success w s1 x1 -> Success w s1 (f x1)
+
+instance Monoid w => Applicative (Parser w s) where
+  pure x = Parser $ \s -> Success mempty s x
+
+  f0 <*> x0 = Parser $ \s0 -> case runParser f0 s0 of
+    Failure w0 s1 -> Failure w0 s1
+    Success w0 s1 f1 -> case runParser x0 s1 of
+      Failure w1 s2 -> Failure (w0 <> w1) s2
+      Success w1 s2 x1 -> Success (w0 <> w1) s2 (f1 x1)
+
+instance Monoid w => Monad (Parser w s) where
+  x0 >>= f0 = Parser $ \s0 -> case runParser x0 s0 of
+    Failure w0 s1 -> Failure w0 s1
+    Success w0 s1 x1 -> case runParser (f0 x1) s1 of
+      Failure w1 s2 -> Failure (w0 <> w1) s2
+      Success w1 s2 y1 -> Success (w0 <> w1) s2 y1
