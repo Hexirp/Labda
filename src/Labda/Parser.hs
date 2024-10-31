@@ -32,7 +32,7 @@ instance Monoid w => Alternative (Parser w s) where
   empty = Parser $ \s -> Failure mempty s
 
   x0 <|> y0 = Parser $ \s0 -> case runParser x0 s0 of
-    Failure w0 s1 -> case runParser y0 s1 of
+    Failure w0 s1 -> case runParser y0 s0 of
       Failure w1 s2 -> Failure (w0 <> w1) s2
       Success w1 s2 y1 -> Success (w0 <> w1) s2 y1
     Success w0 s1 x1 -> Success w0 s1 x1
