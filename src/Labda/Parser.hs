@@ -49,3 +49,5 @@ character c = Parser $ \s -> case s of
 symbol :: String -> Parser String String ()
 symbol [] = pure ()
 symbol (sh : st) = character sh >> symbol st
+
+-- TODO: MonadPlus の a >> mzero が成立していない。
