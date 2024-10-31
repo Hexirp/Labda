@@ -3,7 +3,7 @@ module Labda.Parser where
 import Control.Applicative
 import Control.Monad
 
-data ParserResult w s a = Failure w s | Success w s a
+data ParserResult w s a = Failure w s | Success w s a deriving (Eq, Show)
 
 newtype Parser w s a = Parser { runParser :: s -> ParserResult w s a }
 
@@ -38,3 +38,14 @@ instance Monoid w => Alternative (Parser w s) where
     Success w0 s1 x1 -> Success w0 s1 x1
 
 instance Monoid w => MonadPlus (Parser w s) where
+
+character :: Char -> Parser String String ()
+character c = Parser $ \s -> case s of
+  [] -> Failure "it is ended\n" s
+  sh : st -> if c == sh
+    then Success ("'" ++ [c] ++ "' is detected\n") st ()
+    else Failure ("'" ++ [sh] ++ "' is not '" ++ [c] ++ "'\n") s
+
+symbol :: String -> Parser String String ()
+symbol [] = pure ()
+symbol (sh : st) = character sh >> symbol st
