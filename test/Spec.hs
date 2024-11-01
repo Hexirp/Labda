@@ -62,6 +62,15 @@ main = hspec $ do
         ]
         ""
         ()
+    it "is fine 6" $ do
+      runParser (symbol "Java" <|> symbol "JavaScript") "JavaScript" `shouldBe` Success
+        [ IsMatch 'J' 'J'
+        , IsMatch 'a' 'a'
+        , IsMatch 'v' 'v'
+        , IsMatch 'a' 'a'
+        ]
+        "Script"
+        ()
   describe "format" $ do
     it "returns the formatted code" $ do
       format "lambda x => lambda y => x#1" `shouldBe` "lambda x => lambda y => x#1"
