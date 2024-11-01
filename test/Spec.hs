@@ -15,6 +15,10 @@ main = hspec $ do
       runParser (symbol "lambda") "lain" `shouldBe` Failure []
     it "is fine 3" $ do
       runParser (symbol "lain" <|> symbol "lambda") "lambda" `shouldBe` Success [] "" ()
+    it "is fine 4" $ do
+      runParser (symbol "JavaScript") "Java" `shouldBe` Failure []
+    it "is fine 5" $ do
+      runParser (symbol "JavaScript" <|> symbol "Java") "Java" `shouldBe` Success [] "" ()
   describe "format" $ do
     it "returns the formatted code" $ do
       format "lambda x => lambda y => x#1" `shouldBe` "lambda x => lambda y => x#1"
