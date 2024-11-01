@@ -37,13 +37,13 @@ instance Monoid w => Alternative (Parser w s) where
       Success w1 s2 y1 -> Success (w0 <> w1) s2 y1
     Success w0 s1 x1 -> Success w0 s1 x1
 
-character :: Char -> Parser String String ()
+character :: Char -> Parser [String] String ()
 character c = Parser $ \s -> case s of
-  [] -> Failure "it is ended\n"
+  [] -> Failure ["it is ended"]
   sh : st -> if c == sh
-    then Success ("'" ++ [c] ++ "' is detected\n") st ()
-    else Failure ("'" ++ [sh] ++ "' is not '" ++ [c] ++ "'\n")
+    then Success ["'" ++ [c] ++ "' is detected"] st ()
+    else Failure ["'" ++ [sh] ++ "' is not '" ++ [c] ++ "'\n"]
 
-symbol :: String -> Parser String String ()
+symbol :: String -> Parser [String] String ()
 symbol [] = pure ()
 symbol (sh : st) = character sh >> symbol st
