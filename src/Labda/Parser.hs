@@ -37,8 +37,6 @@ instance Monoid w => Alternative (Parser w s) where
       Success w1 s2 y1 -> Success (w0 <> w1) s2 y1
     Success w0 s1 x1 -> Success w0 s1 x1
 
-instance Monoid w => MonadPlus (Parser w s) where
-
 character :: Char -> Parser String String ()
 character c = Parser $ \s -> case s of
   [] -> Failure "it is ended\n" s
@@ -49,5 +47,3 @@ character c = Parser $ \s -> case s of
 symbol :: String -> Parser String String ()
 symbol [] = pure ()
 symbol (sh : st) = character sh >> symbol st
-
--- TODO: MonadPlus の a >> mzero が成立していない。
