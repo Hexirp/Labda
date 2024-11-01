@@ -12,7 +12,7 @@ main = hspec $ do
     it "is fine" $ do
       runParser (symbol "lambda") "lambda" `shouldBe` Success "" "" ()
     it "is fine 2" $ do
-      runParser (symbol "lambda") "lain" `shouldBe` Failure "" ""
+      runParser (symbol "lambda") "lain" `shouldBe` Failure ""
     it "is fine 3" $ do
       runParser (symbol "lain" <|> symbol "lambda") "lambda" `shouldBe` Success "" "" ()
   describe "format" $ do
