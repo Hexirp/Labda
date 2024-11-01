@@ -51,3 +51,6 @@ character c = Parser $ \s -> case s of
 symbol :: String -> Parser [ParserLogMessage] String ()
 symbol [] = pure ()
 symbol (sh : st) = character sh >> symbol st
+
+end :: Parser [ParserLogMessage] String ()
+end = Parser $ \s -> if s == [] then Success [] s () else Failure []
