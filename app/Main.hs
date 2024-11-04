@@ -6,4 +6,6 @@ import Labda.Parser
 import Labda.UntypedLambdaCalculus
 
 main :: IO ()
-main = print $ runParser (symbol "lain" <|> symbol "lambda") "lambda"
+main = do
+  print $ runParser (symbol "lain" <|> symbol "lambda") "lambda"
+  print $ runParser (symbol "JavaScript" <|> symbol "Java") "Java"
