@@ -9,3 +9,4 @@ main :: IO ()
 main = do
   print $ runParser (symbol "lain" <|> symbol "lambda") "lambda"
   print $ runParser (symbol "JavaScript" <|> symbol "Java") "Java"
+  print $ runParser parseTerm "lambda x => lambda y => x#1"
