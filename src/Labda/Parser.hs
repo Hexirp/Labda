@@ -5,6 +5,11 @@ import Control.Monad
 
 data ParserResult w s a = Failure w | Success w s a deriving (Eq, Show)
 
+fromParserResultToMaybe :: ParserResult w s a -> Maybe a
+fromParserResultToMaybe r = case r of
+  Failure w -> Nothing
+  Success w s a -> Just a
+
 newtype Parser w s a = Parser { runParser :: s -> ParserResult w s a }
 
 instance Functor (Parser w s) where
@@ -37,20 +42,18 @@ instance Monoid w => Alternative (Parser w s) where
       Success w1 s2 y1 -> Success (w0 <> w1) s2 y1
     Success w0 s1 x1 -> Success w0 s1 x1
 
-data CharWithEnd = NoEndChar Char | End deriving (Eq, Show)
-
-data ParserLogMessage = IsMatch Char Char | IsNotMatch CharWithEnd Char deriving (Eq, Show)
-
-character :: Char -> Parser [ParserLogMessage] String ()
+character :: Char -> Parser [String] String ()
 character c = Parser $ \s -> case s of
-  [] -> Failure [IsNotMatch End c]
+  [] -> Failure ["The end does not match " ++ show c ++ "."]
   sh : st -> if sh == c
-    then Success [IsMatch sh c] st ()
-    else Failure [IsNotMatch (NoEndChar sh) c]
+    then Success [show sh ++ " matched " ++ show c ++ "."] st ()
+    else Failure [show sh ++ " did not match " ++ show c ++ "."]
 
-symbol :: String -> Parser [ParserLogMessage] String ()
+symbol :: String -> Parser [String] String ()
 symbol [] = pure ()
 symbol (sh : st) = character sh >> symbol st
 
-end :: Parser [ParserLogMessage] String ()
-end = Parser $ \s -> if s == [] then Success [] s () else Failure []
+end :: Parser [String] String ()
+end = Parser $ \s -> case s of
+  [] -> Success ["The end matched the end."] s ()
+  sh : st -> Failure [show sh ++ " did not match the end."]

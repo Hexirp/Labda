@@ -1,4 +1,9 @@
 module Main ( main ) where
 
+import Control.Applicative
+
+import Labda.Parser
+import Labda.UntypedLambdaCalculus
+
 main :: IO ()
-main = putStrLn "Hello, World!"
+main = print $ runParser (symbol "lain" <|> symbol "lambda") "lambda"
