@@ -7,7 +7,7 @@ import Labda.Parser
 data Term = Variable String Word | Abstraction String Term | Application Term Term deriving (Eq, Show)
 
 parseTerm :: Parser [String] String Term
-parseTerm = parseAbstractionTerm <|> parseApplicationTerm <|> parseVariableTerm
+parseTerm = parseApplicationTerm <|> parseAbstractionTerm <|> parseVariableTerm
 
 parseTermWithParentheses :: Parser [String] String Term
 parseTermWithParentheses =

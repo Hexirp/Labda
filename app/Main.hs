@@ -14,6 +14,8 @@ printParserResult r = case r of
   Success w s a -> do
     putStrLn "= Success ="
     putStrLn ""
+    print $ length w
+    putStrLn ""
     putStrLn $ unlines w
     print s
     putStrLn ""

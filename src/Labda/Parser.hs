@@ -42,18 +42,33 @@ instance Monoid w => Alternative (Parser w s) where
       Success w1 s2 y1 -> Success (w0 <> w1) s2 y1
     Success w0 s1 x1 -> Success w0 s1 x1
 
-character :: Char -> Parser [String] String ()
-character c = Parser $ \s -> case s of
-  [] -> Failure ["The end does not match " ++ show c ++ "."]
-  sh : st -> if sh == c
-    then Success [show sh ++ " matched " ++ show c ++ "."] st ()
-    else Failure [show sh ++ " did not match " ++ show c ++ "."]
+message :: String -> Parser [String] String ()
+message m = Parser $ \s -> Success [m] s ()
 
-symbol :: String -> Parser [String] String ()
-symbol [] = pure ()
-symbol (sh : st) = character sh >> symbol st
+pop :: Parser [String] String Char
+pop = Parser $ \s -> case s of
+  [] -> Failure ["pop: it is the end."]
+  sh : st -> Success ["pop: it is " ++ show sh ++ "."] st sh
 
 end :: Parser [String] String ()
 end = Parser $ \s -> case s of
-  [] -> Success ["The end matched the end."] s ()
-  sh : st -> Failure [show sh ++ " did not match the end."]
+  [] -> Success ["end: the end matched the end."] s ()
+  sh : st -> Failure ["end: " ++ show sh ++ " did not match the end."]
+
+character :: Char -> Parser [String] String ()
+character c = do
+  h <- pop
+  if h == c
+    then do
+      message $ "character: " ++ show h ++ " matched " ++ show c ++ "."
+      pure ()
+    else do
+      message $ "character: " ++ show h ++ " did not match " ++ show c ++ "."
+      empty
+
+symbol :: String -> Parser [String] String ()
+symbol s = case s of
+  [] -> pure ()
+  sh : st -> do
+    character sh
+    symbol st
