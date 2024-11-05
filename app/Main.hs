@@ -10,6 +10,8 @@ printParserResult r = case r of
   Failure w -> do
     putStrLn "= Failure ="
     putStrLn ""
+    print $ length w
+    putStrLn ""
     putStrLn $ unlines w
   Success w s a -> do
     putStrLn "= Success ="

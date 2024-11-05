@@ -6,9 +6,6 @@ import Labda.Parser
 
 data Term = Variable String Word | Abstraction String Term | Application Term Term deriving (Eq, Show)
 
-parseTerm :: Parser [String] String Term
-parseTerm = parseAbstractionTerm <|> parseApplicationTerm <|> parseVariableTerm
-
 parseVariableNameCharacter :: Parser [String] String Char
 parseVariableNameCharacter = do
   h <- pop
@@ -25,15 +22,6 @@ parseVariableIndex = do
   if '0' <= h && h <= '9'
     then pure (read [h])
     else empty
-
-parseTermWithParentheses :: Parser [String] String Term
-parseTermWithParentheses =
-  pure id
-    <* character '('
-    <* character ' '
-    <*> parseTerm
-    <* character ' '
-    <* character ')'
 
 parseVariableTerm :: Parser [String] String Term
 parseVariableTerm =
@@ -59,6 +47,18 @@ parseApplicationTerm =
     <*> (parseTermWithParentheses <|> parseVariableTerm)
     <* character ' '
     <*> (parseTermWithParentheses <|> parseApplicationTerm <|> parseVariableTerm)
+
+parseTermWithParentheses :: Parser [String] String Term
+parseTermWithParentheses =
+  pure id
+    <* character '('
+    <* character ' '
+    <*> parseTerm
+    <* character ' '
+    <* character ')'
+
+parseTerm :: Parser [String] String Term
+parseTerm = parseAbstractionTerm <|> parseApplicationTerm <|> parseVariableTerm
 
 parse :: String -> Term
 parse t = if t == "lambda x => lambda y => x#1"
