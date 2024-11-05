@@ -19,6 +19,13 @@ parseVariableNameCharacter = do
 parseVariableName :: Parser [String] String String
 parseVariableName = some parseVariableNameCharacter
 
+parseVariableIndex :: Parser [String] String Word
+parseVariableIndex = do
+  h <- pop
+  if '0' <= h && h <= '9'
+    then pure (read [h])
+    else empty
+
 parseTermWithParentheses :: Parser [String] String Term
 parseTermWithParentheses =
   pure id
@@ -33,7 +40,7 @@ parseVariableTerm =
   pure Variable
     <*> parseVariableName
     <* character '#'
-    <*> (pure 0 <* character '0' <|> pure 1 <* character '1' <|> pure 2 <* character '2')
+    <*> parseVariableIndex
 
 parseAbstractionTerm :: Parser [String] String Term
 parseAbstractionTerm =
