@@ -9,6 +9,16 @@ data Term = Variable String Word | Abstraction String Term | Application Term Te
 parseTerm :: Parser [String] String Term
 parseTerm = parseApplicationTerm <|> parseAbstractionTerm <|> parseVariableTerm
 
+parseVariableNameCharacter :: Parser [String] String Char
+parseVariableNameCharacter = do
+  h <- pop
+  if 'a' <= h && h <= 'z'
+    then pure h
+    else empty
+
+parseVariableName :: Parser [String] String String
+parseVariableName = some parseVariableNameCharacter
+
 parseTermWithParentheses :: Parser [String] String Term
 parseTermWithParentheses =
   pure id
@@ -21,7 +31,7 @@ parseTermWithParentheses =
 parseVariableTerm :: Parser [String] String Term
 parseVariableTerm =
   pure Variable
-    <*> (pure "x" <* character 'x' <|> pure "y" <* character 'y' <|> pure "z" <* character 'z')
+    <*> parseVariableName
     <* character '#'
     <*> (pure 0 <* character '0' <|> pure 1 <* character '1' <|> pure 2 <* character '2')
 
@@ -30,7 +40,7 @@ parseAbstractionTerm =
   pure Abstraction
     <* symbol "lambda"
     <* character ' '
-    <*> (pure "x" <* character 'x' <|> pure "y" <* character 'y' <|> pure "z" <* character 'z')
+    <*> parseVariableName
     <* character ' '
     <* symbol "=>"
     <* character ' '
