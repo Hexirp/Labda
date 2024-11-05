@@ -46,7 +46,7 @@ parseApplicationTerm =
   pure Application
     <*> (parseTermWithParentheses <|> parseVariableTerm)
     <* character ' '
-    <*> (parseTermWithParentheses <|> parseApplicationTerm <|> parseVariableTerm)
+    <*> (parseTermWithParentheses <|> parseVariableTerm)
 
 parseTermWithParentheses :: Parser [String] String Term
 parseTermWithParentheses =
