@@ -7,21 +7,24 @@ import Labda.Parser
 data Term = Variable String Word | Abstraction String Term | Application Term Term deriving (Eq, Show)
 
 parseVariableNameCharacter :: Parser [String] String Char
-parseVariableNameCharacter = do
-  h <- pop
-  if 'a' <= h && h <= 'z'
-    then pure h
-    else empty
+parseVariableNameCharacter = Parser $ \s -> case s of
+  [] -> Failure ["parseVariableNameCharacter: the end was not accepted."]
+  sh : st -> if 'a' <= sh && sh <= 'z'
+    then Success ["parseVariableNameCharacter: " ++ show sh ++ " was accepted."] st sh
+    else Failure ["parseVariableNameCharacter: " ++ show sh ++ " was not accepted."]
 
 parseVariableName :: Parser [String] String String
-parseVariableName = some parseVariableNameCharacter
+parseVariableName =
+  pure (:)
+    <*> parseVariableNameCharacter
+    <*> (parseVariableName <|> pure "")
 
 parseVariableIndex :: Parser [String] String Word
-parseVariableIndex = do
-  h <- pop
-  if '0' <= h && h <= '9'
-    then pure (read [h])
-    else empty
+parseVariableIndex = Parser $ \s -> case s of
+  [] -> Failure ["parseVariableIndex: the end was not accepted."]
+  sh : st -> if '0' <= sh && sh <= '9'
+    then Success ["parseVariableIndex: " ++ show sh ++ " was accepted."] st (read [sh])
+    else Failure ["parseVariableIndex: " ++ show sh ++ " was not accepted."]
 
 parseVariableTerm :: Parser [String] String Term
 parseVariableTerm =

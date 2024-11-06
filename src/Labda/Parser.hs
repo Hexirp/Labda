@@ -56,15 +56,11 @@ end = Parser $ \s -> case s of
   sh : st -> Failure ["end: " ++ show sh ++ " did not match the end."]
 
 character :: Char -> Parser [String] String ()
-character c = do
-  h <- pop
-  if h == c
-    then do
-      message $ "character: " ++ show h ++ " matched " ++ show c ++ "."
-      pure ()
-    else do
-      message $ "character: " ++ show h ++ " did not match " ++ show c ++ "."
-      empty
+character c = Parser $ \s -> case s of
+  [] -> Failure ["character: the end did not match " ++ show c ++ "."]
+  sh : st -> if sh == c
+    then Success ["character: " ++ show sh ++ " matched " ++ show c ++ "."] st ()
+    else Failure ["character: " ++ show sh ++ " did not match " ++ show c ++ "."]
 
 symbol :: String -> Parser [String] String ()
 symbol s = case s of
