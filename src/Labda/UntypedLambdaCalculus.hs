@@ -68,8 +68,29 @@ parse t = if t == "lambda x => lambda y => x#1"
   then Abstraction "x" (Abstraction "y" (Variable "x" 1))
   else Abstraction "x" (Variable "x" 0)
 
+unparseVariableTerm :: String -> Word -> String
+unparseVariableTerm s i = s ++ "#" ++ show i
+
+unparseAbstractionTerm :: String -> Term -> String
+unparseAbstractionTerm s t = "lambda " ++ s ++ " => " ++ unparseTerm t
+
+unparseApplicationTerm :: Term -> Term -> String
+unparseApplicationTerm t0 t1 = unparseTermWithParentheses t0 ++ " " ++ unparseTermWithParentheses t1
+
+unparseTermWithParentheses :: Term -> String
+unparseTermWithParentheses t = case t of
+  Variable s i -> unparseVariableTerm s i
+  Abstraction s t0 -> "( " ++ unparseAbstractionTerm s t0 ++ " )"
+  Application t0 t1 -> "( " ++ unparseApplicationTerm t0 t1 ++ " )"
+
+unparseTerm :: Term -> String
+unparseTerm t = case t of
+  Variable s i -> unparseVariableTerm s i
+  Abstraction s t0 -> unparseAbstractionTerm s t0
+  Application t0 t1 -> unparseApplicationTerm t0 t1
+
 unparse :: Term -> String
-unparse t = "lambda x => lambda y => x#1"
+unparse = unparseTerm
 
 format :: String -> String
 format t = unparse (parse t)
