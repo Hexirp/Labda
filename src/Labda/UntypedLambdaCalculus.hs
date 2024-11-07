@@ -56,7 +56,7 @@ parseTermWithParentheses =
   pure id
     <* character '('
     <* character ' '
-    <*> parseTerm
+    <*> (parseAbstractionTerm <|> parseApplicationTerm)
     <* character ' '
     <* character ')'
 
