@@ -63,10 +63,8 @@ parseTermWithParentheses =
 parseTerm :: Parser [String] String Term
 parseTerm = parseAbstractionTerm <|> parseApplicationTerm <|> parseVariableTerm
 
-parse :: String -> Term
-parse t = if t == "lambda x => lambda y => x#1"
-  then Abstraction "x" (Abstraction "y" (Variable "x" 1))
-  else Abstraction "x" (Variable "x" 0)
+parse :: String -> Maybe Term
+parse t = fromParserResultToMaybe (runParser parseTerm t)
 
 unparseVariableTerm :: String -> Word -> String
 unparseVariableTerm s i = s ++ "#" ++ show i
@@ -92,5 +90,5 @@ unparseTerm t = case t of
 unparse :: Term -> String
 unparse = unparseTerm
 
-format :: String -> String
-format t = unparse (parse t)
+format :: String -> Maybe String
+format t = fmap unparse (parse t)

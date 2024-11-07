@@ -22,4 +22,4 @@ main = hspec $ do
       fromParserResultToMaybe (runParser (symbol "Java" <|> symbol "JavaScript") "JavaScript") `shouldBe` Just ()
   describe "format" $ do
     it "returns the formatted code" $ do
-      format "lambda x => lambda y => x#1" `shouldBe` "lambda x => lambda y => x#1"
+      format "lambda x => lambda y => x#1" `shouldBe` Just "lambda x => lambda y => x#1"
