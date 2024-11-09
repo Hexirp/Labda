@@ -65,6 +65,4 @@ character c = Parser $ \s -> case s of
 symbol :: String -> Parser [String] String ()
 symbol s = case s of
   [] -> pure ()
-  sh : st -> do
-    character sh
-    symbol st
+  sh : st -> character sh *> symbol st
